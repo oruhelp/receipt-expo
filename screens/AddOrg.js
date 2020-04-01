@@ -28,7 +28,7 @@ import FirebaseContext from '../services/FirebaseContext';
 
 export default function AddOrg(props) {
   const [ngoDetails, setNgoDetails] = useState({
-    ngoName: '',
+    orgName: '',
     userName: '',
     registeredCountry: '',
     registeredDate: new Date(),
@@ -42,6 +42,15 @@ export default function AddOrg(props) {
     console.log(val);
   };
   const addOrg = () => {
+    serviceContext.database
+      .addOrg(ngoDetails)
+      .then(res => {
+        props.history.push('/template');
+      })
+      .catch(err => {
+        serviceContext.setSnackMessage(err);
+      });
+
     serviceContext.service.db
       .ref('orgs/' + ngoDetails.userName)
       .set({
@@ -59,7 +68,7 @@ export default function AddOrg(props) {
           .then(() => {
             serviceContext.setProfile({
               ...serviceContext.profile,
-              orgName: ngoDetails.ngoName,
+              orgName: ngoDetails.orgName,
             });
             props.history.push('/template');
           })
@@ -80,9 +89,9 @@ export default function AddOrg(props) {
         <Item floatingLabel style={styles.element}>
           <Label>Organization Name</Label>
           <Input
-            value={ngoDetails.ngoName}
-            onChangeText={ngoName =>
-              setNgoDetails({ ...ngoDetails, ngoName: ngoName })
+            value={ngoDetails.orgName}
+            onChangeText={_orgName =>
+              setNgoDetails({ ...ngoDetails, orgName: _orgName })
             }
           />
         </Item>

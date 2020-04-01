@@ -17,17 +17,23 @@ export default function App() {
   const [profile, setProfile] = useState(null);
   const [contacts, setContacts] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [database, setDatabase] = useState(null);
   const firebase = new Firebase();
 
   useEffect(() => {
     this.listener = firebase.auth.onAuthStateChanged(_authUser => {
       if (_authUser) {
         setAuthUser(_authUser);
+        if (database == null) {
+          setDatabase(new Database(_authUser.uid));
+        }
       } else {
         setAuthUser(null);
       }
       setLoading(false);
     });
+  }, []);
+  useEffect(() => {
     if (contacts == null) {
       (async () => {
         const { status } = await Permissions.getAsync(Permissions.CONTACTS);
@@ -53,6 +59,7 @@ export default function App() {
     <FirebaseContext.Provider
       value={{
         service: firebase,
+        database: database,
         authUser: authUser,
         profile: profile,
         setProfile: setProfile,

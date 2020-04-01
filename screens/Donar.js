@@ -18,9 +18,11 @@ import {
   Input,
   List,
   ListItem,
+  ActionSheet,
 } from 'native-base';
 import { Caption, Subheading, Divider } from 'react-native-paper';
 import { StyleSheet, View } from 'react-native';
+import { Overlay } from 'react-native-elements';
 import Constants from 'expo-constants';
 import { openDatabase } from 'expo-sqlite';
 import { NativeRouter, Route, Link } from 'react-router-native';
@@ -29,38 +31,33 @@ import FirebaseContext from '../services/FirebaseContext';
 export default function Donar(props) {
   const [contact, setContact] = useState(null);
   const [donations, setDonations] = useState(null);
+  const [openMenu, setOpenMenu] = useState(false);
 
   const serviceContext = useContext(FirebaseContext);
   const db = openDatabase('db');
   useEffect(() => {
-    if (
-      serviceContext.contacts != null &&
-      props.location.state &&
-      props.location.state.id
-    ) {
-      setContact(
-        serviceContext.contacts.filter(
-          contact => contact.id == props.location.state.id
-        )[0]
-      );
-      db.transaction(
-        tx => {
-          tx.executeSql(
-            `select * from receipt where donarId = ${props.location.state.id}`,
-            [],
-            (_, { rows }) => {
-              setDonations(rows._array);
-            }
-          );
-        },
-        null,
-        this.update
-      );
+    if (props.location.state && props.location.state.donar) {
+      setContact(props.location.state.donar);
     }
   }, []);
 
+  const deleteDonar = () => {
+    serviceContext.database
+      .deleteDonar(contact.id)
+      .then(() => props.history.push('/dashboard/donars'))
+      .catch(err => console.log('Error deleting Donar', err));
+  };
   return (
     <Container>
+      <Overlay isVisible={openMenu} onBackdropPress={() => setOpenMenu(false)}>
+        <List>
+          <ListItem onPress={() => deleteDonar()}>
+            <Button transparent>
+              <Text onPress={() => deleteDonar()}>Delete</Text>
+            </Button>
+          </ListItem>
+        </List>
+      </Overlay>
       <Header style={{ backgroundColor: serviceContext.theme.colors.primary }}>
         <Left>
           <Button transparent onPress={() => props.history.goBack()}>
@@ -68,10 +65,10 @@ export default function Donar(props) {
           </Button>
         </Left>
         <Body>
-          <Title>{contact && contact.firstName}</Title>
+          <Title>{contact && contact.name}</Title>
         </Body>
         <Right>
-          <Button transparent onPress={() => props.history.goBack()}>
+          <Button transparent onPress={() => setOpenMenu(true)}>
             <Icon name="md-more" />
           </Button>
         </Right>
@@ -81,33 +78,18 @@ export default function Donar(props) {
           <Caption>Name</Caption>
           <Subheading>{contact && contact.name}</Subheading>
         </View>
-        {contact &&
-          contact.phoneNumbers &&
-          contact.phoneNumbers.length > 0 &&
-          contact.phoneNumbers.map(phoneNumber => (
-            <View style={styles.elements} key={phoneNumber.id}>
-              <Caption>{phoneNumber.label}</Caption>
-              <Subheading>{phoneNumber.number}</Subheading>
-            </View>
-          ))}
-        {contact &&
-          contact.emails &&
-          contact.emails.length > 0 &&
-          contact.emails.map(email => (
-            <View style={styles.elements} key={email.id}>
-              <Caption>{email.label}</Caption>
-              <Subheading>{email.email}</Subheading>
-            </View>
-          ))}
-        {contact &&
-          contact.urlAddresses &&
-          contact.urlAddresses.length > 0 &&
-          contact.urlAddresses.map(urlAddress => (
-            <View style={styles.elements} key={urlAddress.id}>
-              <Caption>{urlAddress.label}</Caption>
-              <Subheading>{urlAddress.url}</Subheading>
-            </View>
-          ))}
+        <View style={styles.elements}>
+          <Caption>Number</Caption>
+          <Subheading>{contact && contact.number}</Subheading>
+        </View>
+        <View style={styles.elements}>
+          <Caption>Email</Caption>
+          <Subheading>{contact && contact.email}</Subheading>
+        </View>
+        <View style={styles.elements}>
+          <Caption>Website</Caption>
+          <Subheading>{contact && contact.website}</Subheading>
+        </View>
         <Divider style={styles.divider} />
         <List>
           <ListItem itemHeader style={{ paddingBottom: 0, paddingTop: 20 }}>

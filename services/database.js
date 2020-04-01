@@ -1,57 +1,92 @@
 import * as SQLite from 'expo-sqlite';
+const TABLE_RECEIPTS = 'receipts';
+const TABLE_DONARS = 'donars';
+const TABLE_ORGS = 'orgs';
 
 export default class Database {
   constructor(dbName) {
-    console.log('Creating new DB - ', dbName);
     this.db = SQLite.openDatabase(dbName);
 
     // create organization
     this.executeQuery(
-      'create table if not exists orgs (id integer primary key not null, orgname text);',
+      'create table if not exists ' +
+        TABLE_ORGS +
+        ' (id integer primary key autoincrement, orgname text, userName text, registeredCountry text, registeredDate text, registeredNumber text, role text, active integer);',
       []
     );
 
     // create receipts table
     this.executeQuery(
-      'create table if not exists receipts (id integer primary key not null, title text, dateTime text, donarId text, donarName text, amount text, notes text, footer text);',
+      'create table if not exists ' +
+        TABLE_RECEIPTS +
+        ' (id integer primary key autoincrement, title text, dateTime text, donarId text, donarName text, amount text, notes text, footer text);',
       []
     );
 
     // create donar table
     this.executeQuery(
-      'create table if not exists donars (id integer primary key not null, fname text, lname text, orgname text);',
+      'create table if not exists ' +
+        TABLE_DONARS +
+        ' (id integer primary key autoincrement, name text, number text, email text, website text, contactBookId text);',
       []
     );
   }
 
-  executeQuery(query, args) {
-    this.db.transaction(tx => {
-      tx.executeSql(
-        query,
-        args,
-        (_, { rows }) => {
-          console.log({ success: true, data: rows });
-          return { success: true, data: rows };
-        },
-        (_, error) => {
-          console.log({ success: false, data: error });
-          return { success: false, data: error };
-        }
-      );
+  executeQuery = (query, args = []) =>
+    new Promise((resolve, reject) => {
+      this.db.transaction(tx => {
+        tx.executeSql(
+          query,
+          args,
+          (_, results) => {
+            resolve(results);
+          },
+          error => {
+            console.log('Error executed some query', error, query, args);
+            reject(error);
+          }
+        );
+      });
     });
-  }
 
   // Organization
-  addOrg() {}
-  getActiveOrg() {}
-  updateOrg() {}
-  deleteOrg() {}
+  addOrg(_orgDetails) {
+    return this.executeQuery(
+      'insert into ' +
+        TABLE_ORGS +
+        ' (orgName, userName, registeredCountry, registeredDate, registeredNumber, role, active) values (?, ?, ?, ?, ?, ?, ?)',
+      [
+        _orgDetails.orgName,
+        _orgDetails.userName,
+        _orgDetails.registeredCountry,
+        _orgDetails.registeredDate,
+        _orgDetails.registeredNumber,
+        _orgDetails.role,
+        1,
+      ]
+    );
+  }
+  getActiveOrg() {
+    return this.executeQuery(
+      'select * from ' + TABLE_ORGS + ' where active = 1'
+    );
+  }
+  updateOrg() {
+    return this.executeQuery('');
+  }
+  deleteOrg() {
+    return this.executeQuery('');
+  }
 
   // Receipt
-  getReceipts() {}
+  getReceipts() {
+    return this.executeQuery('select * from ' + TABLE_RECEIPTS);
+  }
   addReceipt(receipt) {
-    this.executeQuery(
-      'insert into receipt (id, title, dateTime, donarId, donarName, amount, notes, footer) values (?, ?, ?, ?, ?, ?, ?, ?)',
+    return this.executeQuery(
+      'insert into ' +
+        TABLE_RECEIPTS +
+        ' (id, title, dateTime, donarId, donarName, amount, notes, footer) values (?, ?, ?, ?, ?, ?, ?, ?)',
       [
         parseInt(receipt.id, 10),
         receipt.title,
@@ -64,12 +99,39 @@ export default class Database {
       ]
     );
   }
-  getReceipt() {}
+  getReceipt() {
+    return this.executeQuery('');
+  }
 
   // Donar
-  getDonars() {}
-  addDonar() {}
-  getDonar() {}
-  updateDonar() {}
-  deleteDonar() {}
+  getDonars() {
+    return this.executeQuery('select * from ' + TABLE_DONARS);
+  }
+  addDonar(_donar) {
+    return this.executeQuery(
+      'insert into ' +
+        TABLE_DONARS +
+        ' (name, number, email, website, contactBookId) values (?, ?, ?, ?, ?)',
+      [
+        _donar.name,
+        _donar.number,
+        _donar.email,
+        _donar.website,
+        _donar.contactBookId,
+      ]
+    )
+      .then(res => console.log('SUCCESS', res))
+      .catch(err => console.log(err));
+  }
+  getDonar() {
+    return this.executeQuery('');
+  }
+  updateDonar() {
+    return this.executeQuery('');
+  }
+  deleteDonar(_id) {
+    return this.executeQuery(
+      'delete from ' + TABLE_DONARS + ' where id = ' + _id
+    );
+  }
 }

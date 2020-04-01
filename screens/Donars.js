@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { StyleSheet } from 'react-native';
 import { FAB, Avatar, Title } from 'react-native-paper';
 import {
@@ -17,35 +17,22 @@ import { List, ListItem, Left, Body, Right, Thumbnail } from 'native-base';
 import { View } from 'react-native';
 import Constants from 'expo-constants';
 import Drawer from 'react-native-drawer';
-import { openDatabase } from 'expo-sqlite';
 import { NativeRouter, Route, Link } from 'react-router-native';
+import FirebaseContext from '../services/FirebaseContext';
 
 export default function Donars(props) {
   const [donars, setDonars] = useState([]);
-  const db = openDatabase('db');
+  const serviceContext = useContext(FirebaseContext);
 
   useEffect(() => {
-    db.transaction(tx => {
-      tx.executeSql(
-        'create table if not exists donars (id integer primary key not null, fname text, lname text, orgname text);'
-      );
+    serviceContext.database.getDonars().then(data => {
+      data && data.rows && data.rows._array && setDonars(data.rows._array);
     });
-
-    db.transaction(
-      tx => {
-        tx.executeSql('select * from donars', [], (_, { rows }) => {
-          setDonars(rows._array);
-        });
-      },
-      null,
-      this.update
-    );
   }, []);
 
   return (
     <List>
-      {donars &&
-        donars.length > 0 &&
+      {donars && donars.length > 0 ? (
         donars.map(donar => {
           return (
             <ListItem
@@ -53,20 +40,26 @@ export default function Donars(props) {
               onPress={() =>
                 props.history.push({
                   pathname: '/donar',
-                  state: { id: donar.id },
+                  state: { donar: donar },
                 })
               }>
               <Body>
-                <Text>
-                  {(donar.fname != null ? donar.fname : '') +
-                    ' ' +
-                    (donar.lname != null ? donar.lname : '')}
-                </Text>
-                {donar.orgname != null && <Text note>{donar.orgname}</Text>}
+                <Text>{donar.name != null ? donar.name : ''}</Text>
               </Body>
             </ListItem>
           );
-        })}
+        })
+      ) : (
+        <View
+          style={{
+            display: 'flex',
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          <Text>No Donars</Text>
+        </View>
+      )}
     </List>
   );
 }

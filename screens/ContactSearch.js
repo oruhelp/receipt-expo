@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Alert } from 'react-native';
 import { FAB, Avatar } from 'react-native-paper';
 import {
@@ -32,10 +32,11 @@ export default function ContactSearch(props) {
     );
   };
   const onContactSelect = contact => {
+    console.log("Selected Contact->",contact);
     props.history.push({
-            pathname: '/adddonar',
-            state: { contact: contact},
-          });
+      pathname: '/adddonar',
+      state: { contact: contact },
+    });
   };
   return (
     <Container>

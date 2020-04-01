@@ -1,8 +1,7 @@
 export const checkValidator = _validator => {
   for (var prop in _validator) {
     if (Object.prototype.hasOwnProperty.call(_validator, prop)) {
-      console.log(prop, _validator[prop]);
-      if (_validator[prop].failed) {
+      if (_validator[prop] != '' && _validator[prop].failed) {
         return false;
       }
     }
@@ -45,5 +44,16 @@ export const validateUserName = _name => {
   return {
     failed: !_result,
     errorMessage: !_result ? 'Username should be alphanumeric only' : '',
+  };
+};
+
+export const validatePhoneNumber = _phoneNumber => {
+  if (_phoneNumber.trim() == '') {
+    return { failed: true, errorMessage: 'Phone number should not be blank' };
+  }
+  const _result = /^\d+$/.test(_phoneNumber);
+  return {
+    failed: !_result,
+    errorMessage: !_result ? 'Only numbers are allowed' : '',
   };
 };
