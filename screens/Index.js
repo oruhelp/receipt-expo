@@ -50,7 +50,7 @@ export default function Index() {
       <BackButton>
         <Route exact path="/">
           {firebase.authUser ? (
-            <Redirect to="/dashboard/receipts" />
+            <Redirect to="/template" />
           ) : (
             <Redirect to="/signin" />
           )}

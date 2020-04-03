@@ -1,7 +1,8 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { Text, View, StyleSheet, Image } from 'react-native';
 import { Input, Divider } from 'react-native-elements';
 import { Dimensions } from 'react-native';
+import { WebView } from 'react-native-webview';
 import { TextInput } from 'react-native';
 import {
   Container,
@@ -20,73 +21,138 @@ import {
   FooterTab,
   Title,
 } from 'native-base';
+import { FlatList } from 'react-native';
+import { Surface } from 'react-native-paper';
 import Constants from 'expo-constants';
-
-const FirstRoute = () => (
-  <View style={[styles.scene, { backgroundColor: '#ff4081' }]} />
-);
-
-const SecondRoute = () => (
-  <View style={[styles.scene, { backgroundColor: '#673ab7' }]} />
-);
-
-const initialLayout = { width: Dimensions.get('window').width };
+import FirebaseContext from '../services/FirebaseContext';
+import { templates , getCompletedHtml} from '../constants/templates/index';
 
 export default function Template(props) {
-  const [index, setIndex] = React.useState(0);
-  const [routes] = React.useState([
-    { key: 'first', title: 'First' },
-    { key: 'second', title: 'Second' },
-  ]);
-  const cards = [
-    {
-      text: 'Card One',
-      name: 'One',
-      image: { uri: 'https://picsum.photos/700/1000' },
+  const serviceContext = useContext(FirebaseContext);
+  const [activeTemplate, setActiveTemplate] = useState(templates[0]);
+  const [orgDetails, setOrgDetails] = useState();
+  const data = {
+    sender: {
+      name: 'Karthikeyan',
+      role: 'Volunteer',
+      phoneNumber: '+91-7708662218',
+      email: 'karthikeyan@gmail.com',
     },
-    {
-      text: 'Card One',
-      name: 'One',
-      image: { uri: 'https://picsum.photos/700/1000' },
+    approver: {
+      name: 'Surya Kumar',
+      role: 'President',
+      phoneNumber: '+91-1234567890',
+      email: 'suryakmr@gmail.com',
     },
-    {
-      text: 'Card One',
-      name: 'One',
-      image: { uri: 'https://picsum.photos/700/1000' },
+    receiver: {
+      name: 'Guru',
+      phoneNumber: '+91-9659657101',
+      email: 'rajfml@gmail.com',
     },
-  ];
+    org: {
+      name: 'Aarathy Charitable Trust',
+      addressLine1: '10, VGP Santhi Nagar',
+      addressLine2: 'Pallikaranai, Chennai',
+      countryAndPincode: 'India, 600100',
+      phoneNumber: '+91-0987654321',
+      email: 'info@aarathy.org',
+      website: 'www.aarathy.org',
+    },
+    donation: {
+      id: '23423243',
+      amount: '1000',
+      date: '18/Mar/2020',
+      description: 'This is donated for student education',
+      footer: 'From PostMan',
+    },
+  };
 
+  const styles = StyleSheet.create({
+    surface: {
+      margin: 8,
+      height: 90,
+      width: 90,
+      backgroundColor: serviceContext.theme.colors.xprimary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      elevation: 4,
+    },
+    surfaceSelected: {
+      margin: 8,
+      height: 90,
+      width: 90,
+      backgroundColor: serviceContext.theme.colors.xprimary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      elevation: 4,
+      borderColor: serviceContext.theme.colors.primary,
+      borderWidth: 2,
+    },
+  });
   return (
     <Container>
-      <Header>
+      <Header style={{ backgroundColor: serviceContext.theme.colors.primary }}>
+        <Left>
+          <Button transparent onPress={() => props.history.goBack()}>
+            <Icon name="arrow-back" />
+          </Button>
+        </Left>
         <Body>
-          <Title>Select Receipt Template</Title>
+          <Title>Template</Title>
         </Body>
+        <Right />
       </Header>
-      <Content style={styles.paragraph}>
-        <View style={styles.container}>
-          <Title style={styles.title}>Select a Template</Title>
-          <View style={styles.imageContainer}>
-            <DeckSwiper
-              style={styles.imageContainer}
-              dataSource={cards}
-              renderItem={item => (
-                <Image
-                  style={{ height: 500, width: '100%' }}
-                  source={item.image}
-                />
-              )}
-            />
-          </View>
+      <View
+        style={{
+          flex: 1,
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+        }}>
+        <WebView
+          style={styles.list}
+          originWhitelist={['*']}
+          javaScriptEnabled={true}
+          source={{
+            html: getCompletedHtml(activeTemplate.html, data),
+          }}
+        />
+        <View>
+          <FlatList
+            horizontal
+            data={templates}
+            renderItem={({ item: rowData }) => {
+              return (
+                <Button
+                  style={
+                    activeTemplate.id == rowData.id
+                      ? styles.surfaceSelected
+                      : styles.surface
+                  }
+                  onPress={() => setActiveTemplate(rowData)}>
+                  <Text>{rowData.name}</Text>
+                </Button>
+              );
+            }}
+            keyExtractor={(item, index) => index}
+          />
         </View>
-      </Content>
+      </View>
       <Footer>
-        <FooterTab>
-          <Button full onPress={() => props.history.push('/templatecolor')}>
+        <FooterTab
+          style={{ backgroundColor: serviceContext.theme.colors.primary }}>
+          <Button
+            full
+            onPress={() =>
+              props.history.push({
+                pathname: '/templatelogo',
+                state: { orgDetails: orgDetails },
+              })
+            }>
             <Title>Skip</Title>
           </Button>
         </FooterTab>
-        <FooterTab>
+        <FooterTab
+          style={{ backgroundColor: serviceContext.theme.colors.primary }}>
           <Button full onPress={() => props.history.push('/templatecolor')}>
             <Title>Next</Title>
           </Button>
@@ -95,13 +161,3 @@ export default function Template(props) {
     </Container>
   );
 }
-
-const styles = StyleSheet.create({
-  title: {
-    alignSelf: 'center',
-    marginTop: '3%',
-  },
-  imageContainer: {
-    flexGrow: 1,
-  },
-});

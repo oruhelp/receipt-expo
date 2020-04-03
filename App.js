@@ -71,7 +71,11 @@ export default function App() {
         <Route exact path="/" component={Index} />
         {(snackMessage != '' && Keyboard.dismiss()) || (
           <Snackbar
-            style={{ backgroundColor: theme.colors.primary }}
+            style={{
+              backgroundColor: theme.colors.primary,
+              borderWidth: 1,
+              borderColor: theme.colors.xprimary,
+            }}
             visible={snackMessage != ''}
             duration={Snackbar.DURATION_SHORT}
             onDismiss={() => setSnackMessage('')}

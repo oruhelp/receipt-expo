@@ -11,7 +11,7 @@ export default class Database {
     this.executeQuery(
       'create table if not exists ' +
         TABLE_ORGS +
-        ' (id integer primary key autoincrement, orgname text, userName text, registeredCountry text, registeredDate text, registeredNumber text, role text, active integer);',
+        ' (id integer primary key autoincrement, name text, addressLine1 text, addressLine2 text, registeredCountry text, pincode text, role text, phoneNumber text, email text, website text, userName text, registeredDate text, registeredNumber text, active integer, templateName text, templateColor text, logo text);',
       []
     );
 
@@ -54,15 +54,24 @@ export default class Database {
     return this.executeQuery(
       'insert into ' +
         TABLE_ORGS +
-        ' (orgName, userName, registeredCountry, registeredDate, registeredNumber, role, active) values (?, ?, ?, ?, ?, ?, ?)',
+        ' (name, addressLine1, addressLine2, registeredCountry, pincode, role, phoneNumber, email, website, userName, registeredDate, registeredNumber, active) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [
-        _orgDetails.orgName,
-        _orgDetails.userName,
+        _orgDetails.name,
+        _orgDetails.addressLine1,
+        _orgDetails.addressLine2,
         _orgDetails.registeredCountry,
+        _orgDetails.pincode,
+        _orgDetails.role,
+        _orgDetails.email,
+        _orgDetails.email,
+        _orgDetails.website,
+        _orgDetails.userName,
         _orgDetails.registeredDate,
         _orgDetails.registeredNumber,
-        _orgDetails.role,
         1,
+        _orgDetails.templateName,
+        _orgDetails.templateColor,
+        _orgDetails.logo,
       ]
     );
   }

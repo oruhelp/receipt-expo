@@ -39,6 +39,8 @@
     "react-native-vector-icons": "latest",
     "@react-navigation/bottom-tabs": "^5.0.5",
     "react-native-safe-area-context": "^0.6.0",
-    "@react-native-community/masked-view": "^0.1.0"
+    "@react-native-community/masked-view": "^0.1.0",
+    "react-native-render-html": "latest",
+    "react-native-image-crop-picker": "latest"
   }
 }
