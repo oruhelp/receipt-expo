@@ -24,42 +24,62 @@ import { List, ListItem, Thumbnail } from 'native-base';
 import { StyleSheet } from 'react-native';
 import Constants from 'expo-constants';
 import { NativeRouter, Route, Link } from 'react-router-native';
-import { openDatabase } from 'expo-sqlite';
 import FirebaseContext from '../services/FirebaseContext';
 
 export default function Receipt(props) {
-  const db = openDatabase('db');
   const serviceContext = useContext(FirebaseContext);
-  const [receipt, setReceipt] = useState({
-    title: '',
-    id: '',
-    dateTime: '',
-    donarId: '',
-    donarName: '',
-    amount: '',
-    notes: '',
-    footer: '',
-  });
-  const showPreview = () => {};
+  const [receipt, setReceipt] = useState();
+  const showPreview = () => {
+    props.history.push({
+      pathname: '/preview',
+      state: { receipt: receipt },
+    });
+  };
 
   useEffect(() => {
-    const receiptId =
-      props.location && props.location.state && props.location.state.id;
-    db.transaction(
-      tx => {
-        tx.executeSql(
-          `select * from receipt where id = ${receiptId}`,
-          [],
-          (_, { rows }) => {
-            setReceipt(rows._array[0]);
-            console.log(rows._array);
-          },
-          err => console.log(err)
-        );
-      },
-      null,
-      this.update
-    );
+    if (
+      props.location &&
+      props.location.state &&
+      props.location.state.receipt
+    ) {
+      // complete details of the receipt
+      setReceipt({
+        sender: {
+          name: '',
+          role: '',
+          phoneNumber: '',
+          email: '',
+        },
+        approver: {
+          name: '',
+          role: '',
+          phoneNumber: '',
+          email: '',
+        },
+        receiver: {
+          name: props.location.state.receipt.donarDetails.name,
+          phoneNumber: props.location.state.receipt.donarDetails.number,
+          email: props.location.state.receipt.donarDetails.email,
+        },
+        org: {
+          name: '',
+          addressLine1: '',
+          addressLine2: '',
+          countryAndPincode: '',
+          phoneNumber: '',
+          email: '',
+          website: '',
+        },
+        donation: {
+          id: props.location.state.receipt.number,
+          amount: props.location.state.receipt.amount,
+          date: props.location.state.receipt.dateTime,
+          description: props.location.state.receipt.notes,
+          footer: props.location.state.receipt.footer,
+          shortUrl: props.location.state.receipt.shortUrl,
+        },
+      });
+    }
   }, []);
 
   const shareReceipt = () => {
@@ -84,35 +104,48 @@ export default function Receipt(props) {
       <Content>
         <Form>
           <Item stackedLabel>
-            <Label>Invoice Title</Label>
-            <Input value={receipt.title} editable={false} />
-          </Item>
-          <Item stackedLabel>
             <Label>Invoice Number</Label>
-            <Input value={receipt.id.toString()} editable={false} />
+            <Input
+              value={receipt && receipt.donation.id.toString()}
+              editable={false}
+            />
           </Item>
           <Item stackedLabel>
             <Label>Date</Label>
             <Input
-              value={new Date(receipt.dateTime).toLocaleDateString()}
+              value={new Date(
+                receipt && receipt.donation.dateTime
+              ).toLocaleDateString()}
               editable={false}
             />
           </Item>
           <Item stackedLabel>
             <Label>Donar</Label>
-            <Input value={receipt.donarName} editable={false} />
+            <Input
+              value={receipt && receipt.receiver.name}
+              editable={false}
+            />
           </Item>
           <Item stackedLabel>
             <Label>Amount</Label>
-            <Input value={receipt.amount} editable={false} />
+            <Input
+              value={receipt && receipt.donation.amount}
+              editable={false}
+            />
           </Item>
           <Item stackedLabel>
-            <Label>Notes</Label>
-            <Input value={receipt.notes} editable={false} />
+            <Label>Description</Label>
+            <Input
+              value={receipt && receipt.donation.description}
+              editable={false}
+            />
           </Item>
           <Item stackedLabel>
             <Label>Footer</Label>
-            <Input value={receipt.footer} editable={false} />
+            <Input
+              value={receipt && receipt.donation.footer}
+              editable={false}
+            />
           </Item>
         </Form>
       </Content>
@@ -131,7 +164,11 @@ export default function Receipt(props) {
             padding: 0,
             backgroundColor: serviceContext.theme.colors.primary,
           }}>
-          <Button full onPress={() => shareReceipt()}>
+          <Button
+            full
+            onPress={() => {
+              shareReceipt();
+            }}>
             <Title>Share</Title>
           </Button>
         </FooterTab>

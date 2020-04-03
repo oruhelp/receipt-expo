@@ -31,9 +31,8 @@ export default function AddReceipt(props) {
   const db = openDatabase('db');
   const serviceContext = useContext(FirebaseContext);
   const [receipt, setReceipt] = useState({
-    title: '',
-    id: '',
-    dateTime: '',
+    number: '',
+    dateTime: new Date().toString(),
     donarId: '',
     donarName: '',
     amount: '',
@@ -51,58 +50,20 @@ export default function AddReceipt(props) {
 
   const loadDonars = () => {
     setDonarPicker(true);
-    db.transaction(
-      tx => {
-        tx.executeSql(
-          'select * from donars',
-          [],
-          (_, { rows }) => {
-            setDonars(rows._array);
-            console.log(rows._array);
-          },
-          err => console.log(err)
-        );
-      },
-      null,
-      this.update
-    );
+    serviceContext.database
+      .getDonars()
+      .then(res => {
+        setDonars(res.rows._array);
+      })
+      .catch(err => console.log(err));
   };
-  const shareReceipt = () => {
-    db.transaction(tx => {
-      tx.executeSql(
-        'create table if not exists receipt (id integer primary key not null, title text, dateTime text, donarId text, donarName text, amount text, notes text, footer text);'
-      );
-    });
-    db.transaction(
-      tx => {
-        console.log('Executing query');
-        tx.executeSql(
-          'insert into receipt (id, title, dateTime, donarId, donarName, amount, notes, footer) values (?, ?, ?, ?, ?, ?, ?, ?)',
-          [
-            parseInt(receipt.id, 10),
-            receipt.title,
-            receipt.dateTime,
-            receipt.donarId.toString(),
-            receipt.donarName,
-            receipt.amount,
-            receipt.notes,
-            receipt.footer,
-          ],
-          (_, { rows }) => {
-            console.log('Success receipt added to db');
-            props.history.push({
-              pathname: '/sharereceipt',
-              state: { receipt: receipt },
-            });
-          },
-          (_, error) => {
-            console.log(error);
-          }
-        );
-      },
-      null,
-      this.update
-    );
+  const addReceipt = () => {
+    serviceContext.database
+      .addReceipt(receipt)
+      .then(res => {
+        props.history.push('/dashboard/receipts');
+      })
+      .catch(err => console.log(err));
   };
   return (
     <>
@@ -116,21 +77,17 @@ export default function AddReceipt(props) {
               return (
                 <ListItem
                   key={donar.id}
-                  onPress={() => (
+                  onPress={() => {
+                    console.log(donar);
                     setReceipt({
                       ...receipt,
                       donarId: donar.id,
-                      donarName: donar.fname + ' ' + donar.lname,
-                    }),
-                    setDonarPicker(false)
-                  )}>
+                      donarName: donar.name,
+                    });
+                    setDonarPicker(false);
+                  }}>
                   <Body>
-                    <Text>
-                      {(donar.fname != null ? donar.fname : '') +
-                        ' ' +
-                        (donar.lname != null ? donar.lname : '')}
-                    </Text>
-                    {donar.orgname != null && <Text note>{donar.orgname}</Text>}
+                    <Text>{donar.name}</Text>
                   </Body>
                 </ListItem>
               );
@@ -153,24 +110,19 @@ export default function AddReceipt(props) {
         <Content>
           <Form>
             <Item stackedLabel>
-              <Label>Invoice Title</Label>
-              <Input
-                value={receipt.title}
-                onChangeText={title => setReceipt({ ...receipt, title: title })}
-              />
-            </Item>
-            <Item stackedLabel>
               <Label>Invoice Number</Label>
               <Input
-                value={receipt.id}
+                value={receipt.number}
                 keyboardType={'numeric'}
-                onChangeText={id => setReceipt({ ...receipt, id: id })}
+                onChangeText={_number =>
+                  setReceipt({ ...receipt, number: _number })
+                }
               />
             </Item>
             <Item stackedLabel style={{ alignItems: 'flex-start' }}>
               <Label>Date</Label>
               <DatePicker
-                defaultDate={new Date()}
+                defaultDate={new Date(receipt.dateTime)}
                 modalTransparent={false}
                 animationType={'fade'}
                 androidMode={'default'}
@@ -196,7 +148,7 @@ export default function AddReceipt(props) {
               />
             </Item>
             <Item stackedLabel>
-              <Label>Notes</Label>
+              <Label>Description</Label>
               <Input
                 value={receipt.notes}
                 onChangeText={notes => setReceipt({ ...receipt, notes: notes })}
@@ -225,23 +177,8 @@ export default function AddReceipt(props) {
                 padding: 0,
                 backgroundColor: serviceContext.theme.colors.primary,
               }}
-              onPress={() => showPreview()}>
-              <Title>Preview</Title>
-            </Button>
-          </FooterTab>
-          <FooterTab
-            style={{
-              padding: 0,
-              backgroundColor: serviceContext.theme.colors.primary,
-            }}>
-            <Button
-              full
-              style={{
-                padding: 0,
-                backgroundColor: serviceContext.theme.colors.primary,
-              }}
-              onPress={() => shareReceipt()}>
-              <Title>Share</Title>
+              onPress={() => addReceipt()}>
+              <Title>Add Receipt</Title>
             </Button>
           </FooterTab>
         </Footer>

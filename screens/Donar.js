@@ -38,6 +38,9 @@ export default function Donar(props) {
   useEffect(() => {
     if (props.location.state && props.location.state.donar) {
       setContact(props.location.state.donar);
+      serviceContext.database
+        .getReceiptsOfDonar(props.location.state.donar.id)
+        .then(_receiptsData => setDonations(_receiptsData.rows._array));
     }
   }, []);
 

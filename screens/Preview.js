@@ -94,21 +94,6 @@ export default function Preview(props) {
               backgroundColor: serviceContext.theme.colors.primary,
             }}
             onPress={() => props.history.goBack()}>
-            <Title>Save Draft</Title>
-          </Button>
-        </FooterTab>
-        <FooterTab
-          style={{
-            padding: 0,
-            backgroundColor: serviceContext.theme.colors.primary,
-          }}>
-          <Button
-            full
-            style={{
-              padding: 0,
-              backgroundColor: serviceContext.theme.colors.primary,
-            }}
-            onPress={() => props.history.goBack()}>
             <Title>Share</Title>
           </Button>
         </FooterTab>

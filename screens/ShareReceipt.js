@@ -1,4 +1,4 @@
-import React, { Component, useState, useContext } from 'react';
+import React, { Component, useState, useContext, useEffect } from 'react';
 import {
   Container,
   Header,
@@ -28,64 +28,55 @@ import * as SMS from 'expo-sms';
 import Expo from 'expo';
 
 export default function ShareReceipt(props) {
-  const [shortUrl, setShortUrl] = useState('');
+  const [receipt, setReceipt] = useState(null);
+  const [message, setMessage] = useState('');
   const serviceContext = useContext(FirebaseContext);
-  const [snackMessage, setSnackMessage] = useState('');
+
+  useEffect(() => {
+    if (
+      props.location.state &&
+      props.location.state.receipt &&
+      receipt == null
+    ) {
+      setReceipt(props.location.state.receipt);
+    }
+  }, []);
+
   const generateLink = () => {
-    const receiptData = {
-      sender: {
-        name: 'Karthikeyan',
-        role: 'Volunteer',
-        phoneNumber: '+91-7708662218',
-        email: 'karthikeyan@gmail.com',
-      },
-      approver: {
-        name: 'Surya Kumar',
-        role: 'President',
-        phoneNumber: '+91-1234567890',
-        email: 'suryakmr@gmail.com',
-      },
-      receiver: {
-        name: props.location.state.receipt.donarName,
-        phoneNumber: '+91-9659657101',
-        email: 'rajfml@gmail.com',
-      },
-      org: {
-        name: 'Aarathy Charitable Trust',
-        addressLine1: '10, VGP Santhi Nagar',
-        addressLine2: 'Pallikaranai, Chennai',
-        countryAndPincode: 'India, 600100',
-        phoneNumber: '+91-0987654321',
-        email: 'info@aarathy.org',
-        website: 'www.aarathy.org',
-      },
-      donation: {
-        id: props.location.state.receipt.id,
-        amount: props.location.state.receipt.amount,
-        date: props.location.state.receipt.dateTime,
-        description: props.location.state.receipt.notes,
-        footer: props.location.state.receipt.footer,
-      },
-    };
     fetch('https://oru.li/api/shorturl/receipt', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(receiptData),
+      body: JSON.stringify(receipt),
     })
       .then(response => response.json())
       .then(responseJson => {
-        setShortUrl('https://oru.li/' + responseJson.alias);
+        const _shortUrl = 'https://oru.li/' + responseJson.alias;
+        serviceContext.database
+          .updateshortUrlOfReceipt(receipt.donation.id, _shortUrl)
+          .then(() => {
+            setReceipt({
+              ...receipt,
+              donation: { ...receipt.donation, shortUrl: _shortUrl },
+            });
+          })
+          .catch(err => {
+            setReceipt({
+              ...receipt,
+              donation: { ...receipt.donation, shortUrl: _shortUrl },
+            });
+            serviceContext.setSnackMessage('Short URL generated but not saved');
+          });
       })
       .catch(error => {
         console.error(error);
       });
   };
   const copyReceiptUrl = async () => {
-    await Clipboard.setString(shortUrl);
-    setSnackMessage('Receipt URL copied to clipboard!');
+    await Clipboard.setString(receipt.donation.shortUrl);
+    serviceContext.setSnackMessage('Short URL copied to clipboard');
   };
 
   const saveAsPdf = () => {
@@ -102,33 +93,70 @@ export default function ShareReceipt(props) {
   };
 
   const sendThroughWhatsapp = async () => {
-    Linking.openURL(
-      'http://api.whatsapp.com/send?phone=917708662218&text=Thank%20you%20for%20your%20contribution%2E%0A' +
-        shortUrl
-    );
+    const ENTER = '%0A';
+    const SPACE = '%20';
+    if (receipt && receipt.receiver && receipt.donation) {
+      let _message = `Dear${SPACE}${
+        receipt.receiver.name
+      },${ENTER}Received${SPACE}your${SPACE}donation${SPACE}of${SPACE}Rs:${
+        receipt.donation.amount
+      }/-${SPACE}for${SPACE}"${
+        receipt.donation.description
+      }"${SPACE}on${SPACE}${new Date(
+        receipt.donation.date
+      ).toLocaleDateString()}.${ENTER}Receipt${SPACE}Number:${SPACE}${
+        receipt.donation.id
+      }${ENTER}Receipt:${SPACE}${receipt.donation.shortUrl}${ENTER}${ENTER}${
+        receipt.donation.footer
+      }`;
+      Linking.openURL(
+        'http://api.whatsapp.com/send?phone=' +
+          receipt.receiver.phoneNumber +
+          '&text=' +
+          _message
+      );
+    }
   };
 
   const sendAsSMS = () => {
-    Linking.openURL('sms:7708662218?body=' + shortUrl);
+    if (receipt && receipt.receiver && receipt.donation) {
+      let _message = `Dear ${
+        receipt.receiver.name
+      },\nReceived your donation of Rs:${receipt.donation.amount}/- for "${
+        receipt.donation.description
+      }" on ${new Date(
+        receipt.donation.date
+      ).toLocaleDateString()}.\nReceipt Number: ${
+        receipt.donation.id
+      }\nReceipt: ${receipt.donation.shortUrl}\n\n${receipt.donation.footer}`;
+      Linking.openURL(
+        'sms:' + receipt.receiver.phoneNumber + '?body=' + _message
+      );
+    }
   };
 
   const sendAsMail = () => {
-    FileSystem.downloadAsync(
-      'http://gahp.net/wp-content/uploads/2017/09/sample.pdf',
-      FileSystem.documentDirectory + 'small.pdf'
-    )
-      .then(({ uri }) => {
-        MailComposer.composeAsync({
-          recipients: ['ckind90@gmail.com'],
-          ccRecipients: ['owner@trust.com'],
-          subject: 'Test mail with some attachment',
-          body: 'Some body text over here',
-          attachments: [uri],
-        });
-      })
-      .catch(error => {
-        console.error(error);
+    if (receipt && receipt.receiver && receipt.donation) {
+      let _message = `Dear ${
+        receipt.receiver.name
+      },\nReceived your donation of Rs:${receipt.donation.amount}/- for "${
+        receipt.donation.description
+      }" on ${new Date(
+        receipt.donation.date
+      ).toLocaleDateString()}.\nReceipt Number: ${
+        receipt.donation.id
+      }\nReceipt: ${receipt.donation.shortUrl}\n\n${receipt.donation.footer}`;
+
+      MailComposer.composeAsync({
+        recipients: [receipt.receiver.email],
+        subject:
+          receipt.receiver.name +
+          ' Donation Receipt Rs:' +
+          receipt.donation.amount +
+          '/-',
+        body: _message,
       });
+    }
   };
 
   const styles = StyleSheet.create({
@@ -159,14 +187,24 @@ export default function ShareReceipt(props) {
           primary
           bordered
           style={styles.button}
-          onPress={() => (shortUrl == '' ? generateLink() : copyReceiptUrl())}>
-          <Text uppercase={shortUrl == ''}>
-            {shortUrl == '' ? 'Generate receipt link' : shortUrl}
+          onPress={() =>
+            receipt && receipt.donation && receipt.donation.shortUrl
+              ? copyReceiptUrl()
+              : generateLink()
+          }>
+          <Text
+            uppercase={
+              !(receipt && receipt.donation && receipt.donation.shortUrl)
+            }>
+            {receipt && receipt.donation && receipt.donation.shortUrl
+              ? receipt.donation.shortUrl
+              : 'Generate receipt link'}
           </Text>
         </Button>
+
         <Button
           primary
-          disabled={shortUrl == ''}
+          disabled={!(receipt && receipt.donation && receipt.donation.shortUrl)}
           bordered
           style={styles.button}
           onPress={() => sendThroughWhatsapp()}>
@@ -174,7 +212,7 @@ export default function ShareReceipt(props) {
         </Button>
         <Button
           primary
-          disabled={shortUrl == ''}
+          disabled={!(receipt && receipt.donation && receipt.donation.shortUrl)}
           bordered
           style={styles.button}
           onPress={() => sendAsSMS()}>
@@ -182,23 +220,13 @@ export default function ShareReceipt(props) {
         </Button>
         <Button
           primary
-          disabled={shortUrl == ''}
+          disabled={!(receipt && receipt.donation && receipt.donation.shortUrl)}
           bordered
           style={styles.button}
           onPress={() => sendAsMail()}>
           <Text> Send as Mail </Text>
         </Button>
       </Content>
-      <Snackbar
-        visible={snackMessage != ''}
-        duration={Snackbar.DURATION_SHORT}
-        onDismiss={() => setSnackMessage('')}
-        action={{
-          label: 'Okay',
-          onPress: () => setSnackMessage(''),
-        }}>
-        {snackMessage}
-      </Snackbar>
     </Container>
   );
 }

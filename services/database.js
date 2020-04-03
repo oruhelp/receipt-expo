@@ -19,7 +19,7 @@ export default class Database {
     this.executeQuery(
       'create table if not exists ' +
         TABLE_RECEIPTS +
-        ' (id integer primary key autoincrement, title text, dateTime text, donarId text, donarName text, amount text, notes text, footer text);',
+        ' (id integer primary key autoincrement, number text, dateTime text, donarId text, amount text, notes text, footer text, shortUrl text, sentTo text);',
       []
     );
 
@@ -82,25 +82,36 @@ export default class Database {
   getReceipts() {
     return this.executeQuery('select * from ' + TABLE_RECEIPTS);
   }
-  addReceipt(receipt) {
+  addReceipt(_receipt) {
     return this.executeQuery(
       'insert into ' +
         TABLE_RECEIPTS +
-        ' (id, title, dateTime, donarId, donarName, amount, notes, footer) values (?, ?, ?, ?, ?, ?, ?, ?)',
+        ' (id, number, dateTime, donarId, amount, notes, footer) values (?, ?, ?, ?, ?, ?, ?)',
       [
-        parseInt(receipt.id, 10),
-        receipt.title,
-        receipt.dateTime,
-        receipt.donarId.toString(),
-        receipt.donarName,
-        receipt.amount,
-        receipt.notes,
-        receipt.footer,
+        parseInt(_receipt.number),
+        _receipt.number,
+        _receipt.dateTime,
+        _receipt.donarId.toString(),
+        _receipt.amount,
+        _receipt.notes,
+        _receipt.footer,
       ]
     );
   }
-  getReceipt() {
-    return this.executeQuery('');
+  getReceiptsOfDonar(_donarId) {
+    return this.executeQuery(
+      'select * from ' + TABLE_RECEIPTS + ' where donarId = ' + _donarId
+    );
+  }
+  updateshortUrlOfReceipt(_receiptId, _shortUrl) {
+    return this.executeQuery(
+      'update ' +
+        TABLE_RECEIPTS +
+        ' set shortUrl = "' +
+        _shortUrl +
+        '" where id = ' +
+        parseInt(_receiptId)
+    );
   }
 
   // Donar
@@ -122,12 +133,6 @@ export default class Database {
     )
       .then(res => console.log('SUCCESS', res))
       .catch(err => console.log(err));
-  }
-  getDonar() {
-    return this.executeQuery('');
-  }
-  updateDonar() {
-    return this.executeQuery('');
   }
   deleteDonar(_id) {
     return this.executeQuery(
