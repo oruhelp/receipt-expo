@@ -28,7 +28,6 @@ import { NativeRouter, Route, Link } from 'react-router-native';
 import { openDatabase } from 'expo-sqlite';
 
 export default function AddReceipt(props) {
-  const db = openDatabase('db');
   const serviceContext = useContext(FirebaseContext);
   const [receipt, setReceipt] = useState({
     number: '',

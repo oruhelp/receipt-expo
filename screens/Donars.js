@@ -25,6 +25,8 @@ export default function Donars(props) {
   const serviceContext = useContext(FirebaseContext);
 
   useEffect(() => {
+    console.log("and the user name is --------->");
+    console.log(serviceContext.userName);
     serviceContext.database.getDonars().then(data => {
       data && data.rows && data.rows._array && setDonars(data.rows._array);
     });

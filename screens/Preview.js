@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { WebView } from 'react-native-webview';
 import { StyleSheet } from 'react-native';
 import {
@@ -22,10 +22,12 @@ import {
 } from 'native-base';
 import Constants from 'expo-constants';
 import FirebaseContext from '../services/FirebaseContext';
-import { template1 } from '../constants/templates';
+import { templates, getCompletedHtml } from '../constants/templates/index';
 
 export default function Preview(props) {
   const serviceContext = useContext(FirebaseContext);
+  const [userDetails, setUserDetails] = useState();
+  const [receiptDetails, setReceiptDetails] = useState();
   const data = {
     sender: {
       name: 'Karthikeyan',
@@ -61,6 +63,51 @@ export default function Preview(props) {
       footer: 'From PostMan',
     },
   };
+
+  useEffect(() => {
+    console.log('Preview constructor - ', props.location.state);
+    serviceContext.database
+      .getActiveOrg()
+      .then(res => {
+        const _detailsFromDB = res.rows._array[0];
+        console.log('Details from DB', _detailsFromDB);
+        const _value = {
+          ...receiptDetails,
+          sender: {
+            name: _detailsFromDB.senderName,
+            role: _detailsFromDB.role,
+            phoneNumber: _detailsFromDB.senderPhoneNumber,
+            email: _detailsFromDB.senderEmail,
+          },
+          receiver: { ...props.location.state.receipt.receiver },
+          org: {
+            name: _detailsFromDB.name,
+            addressLine1: _detailsFromDB.addressLine1,
+            addressLine2: _detailsFromDB.addressLine2,
+            countryAndPincode:
+              _detailsFromDB.registeredCountry + ',' + _detailsFromDB.pincode,
+            phoneNumber: _detailsFromDB.phoneNumber,
+            email: _detailsFromDB.email,
+            website: _detailsFromDB.website,
+          },
+          donation: { ...props.location.state.receipt.donation },
+        };
+        console.log('Preview with the details -> ', _value);
+        setReceiptDetails(_value);
+      })
+      .catch(err => console.log('OHR1245 - ', err));
+
+    // !userDetails &&
+    //   serviceContext.service.db
+    //     .ref('/users/' + serviceContext.userName + '/profile/')
+    //     .once('value')
+    //     .then(function(snapshot) {
+    //       setReceiptDetails({
+    //         ...receiptDetails,
+    //         sender: { ...receiptDetails.sender, ...snapshot },
+    //       });
+    //     });
+  }, []);
   return (
     <Container>
       <Header style={{ backgroundColor: serviceContext.theme.colors.primary }}>
@@ -78,7 +125,9 @@ export default function Preview(props) {
         originWhitelist={['*']}
         javaScriptEnabled
         source={{
-          html: template1.replace('___###input###___', JSON.stringify(data)),
+          html: receiptDetails
+            ? getCompletedHtml(templates[0].html, receiptDetails)
+            : '<h1>Loading<h1>',
         }}
       />
       <Footer>

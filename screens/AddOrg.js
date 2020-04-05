@@ -1,5 +1,5 @@
-import React, { useContext, useState } from 'react';
-import { Text, View, StyleSheet, Image, Alert } from 'react-native';
+import React, { useContext, useState, useEffect } from 'react';
+import { Text, View, StyleSheet, Image, Alert, ScrollView } from 'react-native';
 import {
   Container,
   Header,
@@ -22,40 +22,114 @@ import {
   DatePicker,
 } from 'native-base';
 import { TextInput } from 'react-native-paper';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scrollview';
 import { Paragraph, Divider } from 'react-native-paper';
 import Constants from 'expo-constants';
 import { countries } from '../constants/countries';
 import FirebaseContext from '../services/FirebaseContext';
 
 export default function AddOrg(props) {
+  const roles = [
+    {
+      value: 'president',
+      label: 'I am the President',
+    },
+    {
+      value: 'secretary',
+      label: 'I am the Secretary',
+    },
+    {
+      value: 'trustee',
+      label: 'I am a Trustee',
+    },
+    {
+      value: 'staff',
+      label: 'I am a Staff',
+    },
+  ];
   const INITIAL_STATE = {
     name: '',
     addressLine1: '',
     addressLine2: '',
-    registeredCountry: '',
+    registeredCountry: countries[0].name,
     pincode: '',
-    role: '',
+    role: roles[0].value,
     phoneNumber: '',
     email: '',
     website: '',
     userName: '',
-    registeredDate: new Date(),
+    registeredDate: '',
     registeredNumber: '',
     templateName: '',
     templateColor: '',
-    logo: '',
+    logoSrc: '',
   };
   const [ngoDetails, setNgoDetails] = useState(INITIAL_STATE);
-  const [validator, setValidator] = useState({
-    ...INITIAL_STATE,
-    registeredDate: '',
-  });
+  const [validator, setValidator] = useState(INITIAL_STATE);
 
   const serviceContext = useContext(FirebaseContext);
 
-  const roleChange = val => {
-    console.log(val);
+  useEffect(() => {
+    console.log('displayName is ', serviceContext.authUser);
+    if (serviceContext.authUser.displayName == '')
+      serviceContext.authUser.updateProfile({
+        displayName: `${props.location.state.signUpDetails.userName.toLowerCase()}#1#1`,
+      });
+  }, []);
+  
+  const validate = () => {
+    if (ngoDetails.name.length < 4) {
+      serviceContext.setSnackMessage(
+        'Organization Name should be minimum 4 characters'
+      );
+      return false;
+    }
+    if (ngoDetails.userName.length < 4) {
+      serviceContext.setSnackMessage('Username should be minimum 4 characters');
+      return false;
+    }
+    if (validator.userName.failed) {
+      serviceContext.setSnackMessage('Username not available');
+      return false;
+    }
+
+    if (ngoDetails.addressLine1.length < 1) {
+      serviceContext.setSnackMessage('Address Line 1 should not be empty');
+      return false;
+    }
+
+    if (ngoDetails.addressLine2.length < 1) {
+      serviceContext.setSnackMessage('Address Line 2 should not be empty');
+      return false;
+    }
+
+    if (ngoDetails.registeredCountry.length < 1) {
+      serviceContext.setSnackMessage('Country should not be empty');
+      return false;
+    }
+
+    if (ngoDetails.pincode.length < 1) {
+      serviceContext.setSnackMessage('Pincode should not be empty');
+      return false;
+    }
+
+    if (ngoDetails.role.length < 1) {
+      serviceContext.setSnackMessage('Role should not be empty');
+      return false;
+    }
+
+    if (ngoDetails.registeredDate.length < 1) {
+      serviceContext.setSnackMessage('Please select the registered date');
+      return false;
+    }
+
+    if (ngoDetails.registeredNumber.length < 1) {
+      serviceContext.setSnackMessage('Registered number should not be empty');
+      return false;
+    }
+    return true;
   };
+
   const checkUserName = () => {
     if (ngoDetails.userName.length < 4) {
       setValidator({
@@ -65,10 +139,10 @@ export default function AddOrg(props) {
           errorMessage: 'Username should be atlease 4 characters',
         },
       });
-      return;
+      return false;
     }
     serviceContext.service.db
-      .ref(`orgs/${ngoDetails.userName}`)
+      .ref(`orgs/${ngoDetails.userName.toLowerCase()}`)
       .once('value', snapshot => {
         if (snapshot.exists()) {
           setValidator({
@@ -78,6 +152,7 @@ export default function AddOrg(props) {
               errorMessage: ngoDetails.userName + ' - username already taken',
             },
           });
+          return false;
         } else {
           setValidator({
             ...validator,
@@ -86,43 +161,27 @@ export default function AddOrg(props) {
               errorMessage: '',
             },
           });
+          return true;
         }
       });
   };
   const addOrg = () => {
-    serviceContext.database
-      .addOrg(ngoDetails)
-      .then(res => {
-        props.history.push('/template');
-      })
-      .catch(err => {
-        serviceContext.setSnackMessage(err);
-      });
-
-    serviceContext.service.db
-      .ref('orgs/' + ngoDetails.userName)
-      .set({
-        profile: { ...ngoDetails },
-        users: {
-          creator: { uid: serviceContext.authUser.uid, role: ngoDetails.role },
+    if (!validate()) {
+      return false;
+    }
+    props.history.push({
+      pathname: '/templatelogo',
+      state: {
+        orgDetails: {
+          ...ngoDetails,
+          userDetails:
+            props.location &&
+            props.location.state &&
+            props.location.state.signUpDetails,
         },
-      })
-      .then(() => {
-        return serviceContext.service.db
-          .ref('users/' + serviceContext.authUser.uid + '/orgs')
-          .set({
-            [ngoDetails.userName]: ngoDetails.role,
-          })
-          .then(() => {
-            serviceContext.setProfile({
-              ...serviceContext.profile,
-              orgName: ngoDetails.orgName,
-            });
-            props.history.push('/template');
-          })
-          .catch(err => console.log(err));
-      })
-      .catch(err => console.log(err));
+      },
+    });
+    return true;
   };
   return (
     <Container>
@@ -133,7 +192,9 @@ export default function AddOrg(props) {
         </Body>
       </Header>
       <Content style={styles.paragraph}>
-        <Item style={styles.element}>
+        <Item
+          style={styles.element}
+          error={validator.name != '' && validator.name.failed}>
           <Input
             placeholder="Organization Name"
             value={ngoDetails.name}
@@ -141,6 +202,14 @@ export default function AddOrg(props) {
               setNgoDetails({ ...ngoDetails, name: _name })
             }
           />
+          {validator.name != '' && validator.name.failed && (
+            <Icon
+              name="alert"
+              onPress={() => {
+                serviceContext.setSnackMessage(validator.name.errorMessage);
+              }}
+            />
+          )}
         </Item>
         <Item
           style={styles.element}
@@ -162,7 +231,9 @@ export default function AddOrg(props) {
             />
           )}
         </Item>
-        <Item style={styles.element}>
+        <Item
+          style={styles.element}
+          error={validator.addressLine1 != '' && validator.addressLine1.failed}>
           <Input
             placeholder="Address Line 1"
             value={ngoDetails.addressLine1}
@@ -170,8 +241,20 @@ export default function AddOrg(props) {
               setNgoDetails({ ...ngoDetails, addressLine1: _addressLine1 })
             }
           />
+          {validator.addressLine1 != '' && validator.addressLine1.failed && (
+            <Icon
+              name="alert"
+              onPress={() => {
+                serviceContext.setSnackMessage(
+                  validator.addressLine1.errorMessage
+                );
+              }}
+            />
+          )}
         </Item>
-        <Item style={styles.element}>
+        <Item
+          style={styles.element}
+          error={validator.addressLine2 != '' && validator.addressLine2.failed}>
           <Input
             placeholder="Address Line 2"
             value={ngoDetails.addressLine2}
@@ -179,6 +262,16 @@ export default function AddOrg(props) {
               setNgoDetails({ ...ngoDetails, addressLine2: _addressLine2 })
             }
           />
+          {validator.addressLine2 != '' && validator.addressLine2.failed && (
+            <Icon
+              name="alert"
+              onPress={() => {
+                serviceContext.setSnackMessage(
+                  validator.addressLine2.errorMessage
+                );
+              }}
+            />
+          )}
         </Item>
         <Form>
           <Item picker style={styles.element}>
@@ -188,16 +281,18 @@ export default function AddOrg(props) {
               placeholderStyle={{ color: '#bfc6ea' }}
               placeholderIconColor="#007aff"
               selectedValue={ngoDetails.registeredCountry}
-              onValueChange={value =>
-                setNgoDetails({ ...ngoDetails, registeredCountry: value })
-              }>
+              onValueChange={value => {
+                setNgoDetails({ ...ngoDetails, registeredCountry: value });
+              }}>
               {countries.map(country => (
                 <Picker.Item label={country.name} value={country.name} />
               ))}
             </Picker>
           </Item>
         </Form>
-        <Item style={styles.element}>
+        <Item
+          style={styles.element}
+          error={validator.pincode != '' && validator.pincode.failed}>
           <Input
             placeholder="Pincode"
             value={ngoDetails.pincode}
@@ -208,6 +303,14 @@ export default function AddOrg(props) {
               })
             }
           />
+          {validator.pincode != '' && validator.pincode.failed && (
+            <Icon
+              name="alert"
+              onPress={() => {
+                serviceContext.setSnackMessage(validator.pincode.errorMessage);
+              }}
+            />
+          )}
         </Item>
         <Form>
           <Item picker style={styles.element}>
@@ -217,21 +320,18 @@ export default function AddOrg(props) {
               placeholderStyle={{ color: '#bfc6ea' }}
               placeholderIconColor="#007aff"
               selectedValue={ngoDetails.role}
-              onValueChange={value =>
-                setNgoDetails({ ...ngoDetails, role: value })
+              onValueChange={_role =>
+                setNgoDetails({ ...ngoDetails, role: _role.value })
               }>
-              <Picker.Item label="I am the President" value="president" />
-              <Picker.Item label="I am the Secretary" value="secretary" />
-              <Picker.Item label="I am a Trustee" value="trustee" />
-              <Picker.Item label="I am a Staff" value="staff" />
-              <Picker.Item label="I am a Volunteer" value="volunteer" />
-              <Picker.Item label="Others" value="others" />
+              {roles.map(role => (
+                <Picker.Item label={role.label} value={role.value} />
+              ))}
             </Picker>
           </Item>
         </Form>
         <Item style={styles.element}>
           <DatePicker
-            defaultDate={new Date(ngoDetails.registeredDate)}
+            defaultDate={new Date()}
             maximumDate={new Date()}
             locale={'en'}
             style={{ margin: 0, padding: 0 }}
@@ -247,7 +347,12 @@ export default function AddOrg(props) {
           />
         </Item>
         <Divider style={styles.element} />
-        <Item style={styles.element}>
+        <Item
+          style={styles.element}
+          error={
+            validator.registeredNumber != '' &&
+            validator.registeredNumber.failed
+          }>
           <Input
             placeholder="Registration Number"
             value={ngoDetails.registeredNumber}
@@ -258,6 +363,17 @@ export default function AddOrg(props) {
               })
             }
           />
+          {validator.registeredNumber != '' &&
+            validator.registeredNumber.failed && (
+              <Icon
+                name="alert"
+                onPress={() => {
+                  serviceContext.setSnackMessage(
+                    validator.registeredNumber.errorMessage
+                  );
+                }}
+              />
+            )}
         </Item>
       </Content>
       <Footer>
@@ -266,10 +382,7 @@ export default function AddOrg(props) {
             padding: 0,
             backgroundColor: serviceContext.theme.colors.primary,
           }}>
-          <Button full onPress={() =>  props.history.push({
-          pathname: '/template',
-          state: { ngoDetails: ngoDetails },
-        })}>
+          <Button full onPress={() => addOrg()}>
             <Title>Next</Title>
           </Button>
         </FooterTab>

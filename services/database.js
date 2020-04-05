@@ -1,4 +1,5 @@
 import * as SQLite from 'expo-sqlite';
+const TABLE_USER = 'user';
 const TABLE_RECEIPTS = 'receipts';
 const TABLE_DONARS = 'donars';
 const TABLE_ORGS = 'orgs';
@@ -7,11 +8,19 @@ export default class Database {
   constructor(dbName) {
     this.db = SQLite.openDatabase(dbName);
 
+    // create user
+    this.executeQuery(
+      'create table if not exists ' +
+        TABLE_USER +
+        ' (id integer primary key autoincrement, name text, email text, phoneNumber text, userName text, activeOrg text, lookupId text);',
+      []
+    );
+
     // create organization
     this.executeQuery(
       'create table if not exists ' +
         TABLE_ORGS +
-        ' (id integer primary key autoincrement, name text, addressLine1 text, addressLine2 text, registeredCountry text, pincode text, role text, phoneNumber text, email text, website text, userName text, registeredDate text, registeredNumber text, active integer, templateName text, templateColor text, logo text);',
+        ' (id integer primary key autoincrement, name text, addressLine1 text, addressLine2 text, registeredCountry text, pincode text, role text, phoneNumber text, email text, website text, userName text, registeredDate text, registeredNumber text, active integer, templateName text, templateColor text, logoSrc text, lookupId integer, senderName text, senderPhoneNumber text, senderEmail text);',
       []
     );
 
@@ -49,29 +58,64 @@ export default class Database {
       });
     });
 
+  // user
+  addUser(_userDetails) {
+    return this.executeQuery(
+      'insert into ' +
+        TABLE_USER +
+        ' (id, name, email, phoneNumber, userName, lookupId) values (?, ?, ?, ?, ?, ?)',
+      [
+        1,
+        _userDetails.name,
+        _userDetails.email,
+        _userDetails.phoneNumber,
+        _userDetails.userName,
+        1,
+      ]
+    );
+  }
+
+  getActiveUserName() {
+    return this.executeQuery('select * from ' + TABLE_USER);
+  }
+
+  updateActiveOrgOfUser(_orgUserName) {
+    return this.executeQuery(
+      'update ' +
+        TABLE_USER +
+        ' set activeOrg = "' +
+        _orgUserName +
+        '" where id = 1'
+    );
+  }
+
   // Organization
   addOrg(_orgDetails) {
     return this.executeQuery(
       'insert into ' +
         TABLE_ORGS +
-        ' (name, addressLine1, addressLine2, registeredCountry, pincode, role, phoneNumber, email, website, userName, registeredDate, registeredNumber, active) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        ' (name, addressLine1, addressLine2, registeredCountry, pincode, role, phoneNumber, email, website, userName, registeredDate, registeredNumber, active, templateName, templateColor, logoSrc, lookupId, senderName, senderPhoneNumber, senderEmail) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?, ?)',
       [
         _orgDetails.name,
         _orgDetails.addressLine1,
         _orgDetails.addressLine2,
         _orgDetails.registeredCountry,
         _orgDetails.pincode,
-        _orgDetails.role,
-        _orgDetails.email,
+        _orgDetails.sender.role,
+        _orgDetails.phoneNumber,
         _orgDetails.email,
         _orgDetails.website,
         _orgDetails.userName,
-        _orgDetails.registeredDate,
+        _orgDetails.registeredDate.toString(),
         _orgDetails.registeredNumber,
         1,
         _orgDetails.templateName,
         _orgDetails.templateColor,
-        _orgDetails.logo,
+        _orgDetails.logoSrc,
+        1,
+        _orgDetails.sender.name,
+        _orgDetails.sender.phoneNumber,
+        _orgDetails.sender.email,
       ]
     );
   }

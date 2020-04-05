@@ -29,7 +29,9 @@ export default function SideBarContent(props) {
       color: serviceContext.theme.colors.primary,
     },
   });
-
+  const getUser = () => {
+    serviceContext.setSnackMessage(serviceContext.userName);
+  };
   return (
     <Container style={styles.container}>
       <Content>
@@ -49,6 +51,13 @@ export default function SideBarContent(props) {
         <Button transparent style={{ justifyContent: 'flex-start' }}>
           <Icon name="person" style={styles.icon} />
           <Text style={styles.listButton}>Profile</Text>
+        </Button>
+        <Button
+          transparent
+          style={{ justifyContent: 'flex-start' }}
+          onPress={() => getUser()}>
+          <Icon name="person" style={styles.icon} />
+          <Text style={styles.listButton}>Get User</Text>
         </Button>
         <Button
           transparent
@@ -85,8 +94,7 @@ export default function SideBarContent(props) {
           transparent
           onPress={() => {
             props.history.push('/signin');
-            return serviceContext.service.doSignOut().then(() => {
-            });
+            return serviceContext.service.doSignOut().then(() => {});
           }}>
           <Icon name="log-out" style={styles.icon} />
           <Text style={styles.listButton}>Sign Out</Text>

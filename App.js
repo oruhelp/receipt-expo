@@ -13,6 +13,7 @@ import { theme } from './constants/theme';
 
 export default function App() {
   const [authUser, setAuthUser] = useState(null);
+  const [userName, setUserName] = useState(null);
   const [snackMessage, setSnackMessage] = useState('');
   const [profile, setProfile] = useState(null);
   const [contacts, setContacts] = useState(null);
@@ -24,6 +25,9 @@ export default function App() {
     this.listener = firebase.auth.onAuthStateChanged(_authUser => {
       if (_authUser) {
         setAuthUser(_authUser);
+        if (_authUser.displayName != '') {
+          setUserName(_authUser.displayName.split('#')[0]);
+        }
         if (database == null) {
           setDatabase(new Database(_authUser.uid));
         }
@@ -60,6 +64,7 @@ export default function App() {
       value={{
         service: firebase,
         database: database,
+        userName: userName,
         authUser: authUser,
         profile: profile,
         setProfile: setProfile,

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Text, View, StyleSheet, Image } from 'react-native';
 import { Input, Divider } from 'react-native-elements';
 import { Dimensions } from 'react-native';
@@ -25,48 +25,122 @@ import { FlatList } from 'react-native';
 import { Surface } from 'react-native-paper';
 import Constants from 'expo-constants';
 import FirebaseContext from '../services/FirebaseContext';
-import { templates , getCompletedHtml} from '../constants/templates/index';
+import { templates, getCompletedHtml } from '../constants/templates/index';
 
 export default function Template(props) {
   const serviceContext = useContext(FirebaseContext);
   const [activeTemplate, setActiveTemplate] = useState(templates[0]);
   const [orgDetails, setOrgDetails] = useState();
-  const data = {
-    sender: {
-      name: 'Karthikeyan',
-      role: 'Volunteer',
-      phoneNumber: '+91-7708662218',
-      email: 'karthikeyan@gmail.com',
-    },
-    approver: {
-      name: 'Surya Kumar',
-      role: 'President',
-      phoneNumber: '+91-1234567890',
-      email: 'suryakmr@gmail.com',
-    },
-    receiver: {
-      name: 'Guru',
-      phoneNumber: '+91-9659657101',
-      email: 'rajfml@gmail.com',
-    },
-    org: {
-      name: 'Aarathy Charitable Trust',
-      addressLine1: '10, VGP Santhi Nagar',
-      addressLine2: 'Pallikaranai, Chennai',
-      countryAndPincode: 'India, 600100',
-      phoneNumber: '+91-0987654321',
-      email: 'info@aarathy.org',
-      website: 'www.aarathy.org',
-    },
-    donation: {
-      id: '23423243',
-      amount: '1000',
-      date: '18/Mar/2020',
-      description: 'This is donated for student education',
-      footer: 'From PostMan',
-    },
-  };
 
+  useEffect(() => {
+    console.log(
+      'Template page, org details',
+      props.location.state.orgDetails.userDetails
+    );
+    if (props.location.state && props.location.state.orgDetails) {
+      setOrgDetails({
+        sender: {
+          name: props.location.state.orgDetails.userDetails.name,
+          phoneNumber: props.location.state.orgDetails.userDetails.phoneNumber,
+          email: props.location.state.orgDetails.userDetails.email,
+          role: props.location.state.orgDetails.role,
+        },
+        approver: {
+          name: '',
+          role: '',
+          phoneNumber: '',
+          email: '',
+        },
+        receiver: {
+          name: 'Donar Name',
+          phoneNumber: '+91-1234567890',
+          email: 'noreply@oruhelp.com',
+        },
+        org: {
+          name: props.location.state.orgDetails.name,
+          addressLine1: props.location.state.orgDetails.addressLine1,
+          addressLine2: props.location.state.orgDetails.addressLine2,
+          registeredCountry: props.location.state.orgDetails.registeredCountry,
+          pincode: props.location.state.orgDetails.pincode,
+          phoneNumber: props.location.state.orgDetails.phoneNumber,
+          email: props.location.state.orgDetails.email,
+          website: props.location.state.orgDetails.website,
+          logoSrc: props.location.state.orgDetails.logoSrc,
+          userName: props.location.state.orgDetails.userName,
+          registeredDate: props.location.state.orgDetails.registeredDate,
+          registeredNumber: props.location.state.orgDetails.registeredNumber,
+          templateName: activeTemplate.id,
+          templateColor: props.location.state.orgDetails.templateColor,
+        },
+        donation: {
+          id: '1343',
+          amount: '1000',
+          date: '04/Apr/2020',
+          description: 'This is donated for student education',
+          footer: 'Thank you for your contribution',
+        },
+      });
+    }
+  }, []);
+
+  const updateOrgDetailsToFirebase = _userName => {
+    return serviceContext.service.db
+      .ref('orgs/' + orgDetails.org.userName.toLowerCase())
+      .set({
+        profile: { ...orgDetails.org, lookupId: 1 },
+        users: {
+          creator: {
+            uid: serviceContext.authUser.uid,
+            userName: _userName,
+            role: orgDetails.sender.role,
+          },
+        },
+      });
+  };
+  const updateOrgDetailsToDb = () => {
+    console.log('Updating org details to DB', orgDetails);
+    return serviceContext.database.addOrg({
+      ...orgDetails.org,
+      sender: orgDetails.sender,
+    });
+  };
+  const updateOrgDetailsToUserInFirebase = _userName => {
+    console.log('userName', _userName);
+    return serviceContext.service.db.ref('users/' + _userName + '/orgs').set({
+      [orgDetails.org.userName]: orgDetails.sender.role,
+    });
+  };
+  const registerOrg = () => {
+    const _userName = serviceContext.authUser.displayName.split('#')[0];
+    return updateOrgDetailsToUserInFirebase(_userName)
+      .then(() => {
+        return updateOrgDetailsToFirebase(_userName)
+          .then(() => {
+            console.log('Updating ORG details to database');
+            return updateOrgDetailsToDb()
+              .then(res => {
+                console.log('Updated ORG details to database', res);
+                props.history.push('/dashboard/receipts');
+              })
+              .catch(err => {
+                console.log('Erro updated ORG details to database', err);
+                serviceContext.setSnackMessage(
+                  'OHR1330 - Some unexpected error occurred, and could not proceed. Please contact support.'
+                );
+              });
+          })
+          .catch(err =>
+            serviceContext.setSnackMessage(
+              'OHR1331 - Some unexpected error occurred, and could not proceed. Please contact support.'
+            )
+          );
+      })
+      .catch(err =>
+        serviceContext.setSnackMessage(
+          'OHR1332 - Some unexpected error occurred, and could not proceed. Please contact support.'
+        )
+      );
+  };
   const styles = StyleSheet.create({
     surface: {
       margin: 8,
@@ -98,7 +172,7 @@ export default function Template(props) {
           </Button>
         </Left>
         <Body>
-          <Title>Template</Title>
+          <Title>Template1</Title>
         </Body>
         <Right />
       </Header>
@@ -113,7 +187,9 @@ export default function Template(props) {
           originWhitelist={['*']}
           javaScriptEnabled={true}
           source={{
-            html: getCompletedHtml(activeTemplate.html, data),
+            html: orgDetails
+              ? getCompletedHtml(activeTemplate.html, orgDetails)
+              : '<h1>Loading<h1>',
           }}
         />
         <View>
@@ -140,21 +216,8 @@ export default function Template(props) {
       <Footer>
         <FooterTab
           style={{ backgroundColor: serviceContext.theme.colors.primary }}>
-          <Button
-            full
-            onPress={() =>
-              props.history.push({
-                pathname: '/templatelogo',
-                state: { orgDetails: orgDetails },
-              })
-            }>
-            <Title>Skip</Title>
-          </Button>
-        </FooterTab>
-        <FooterTab
-          style={{ backgroundColor: serviceContext.theme.colors.primary }}>
-          <Button full onPress={() => props.history.push('/templatecolor')}>
-            <Title>Next</Title>
+          <Button full onPress={() => registerOrg()}>
+            <Title>Register</Title>
           </Button>
         </FooterTab>
       </Footer>

@@ -47,19 +47,19 @@ const data = {
 export const getCompletedHtml = (_template, receipt) => {
   let _resultHtml = _template;
   _resultHtml = _resultHtml.replace(
-    '__receipt.sender.name__',
+    /__receipt.sender.name__/g,
     receipt.sender.name
   );
   _resultHtml = _resultHtml.replace(
-    '__receipt.sender.role__',
+    /__receipt.sender.role__/g,
     receipt.sender.role
   );
   _resultHtml = _resultHtml.replace(
-    '__receipt.sender.phoneNumber__',
+    /__receipt.sender.phoneNumber__/g,
     receipt.sender.phoneNumber
   );
   _resultHtml = _resultHtml.replace(
-    '__receipt.sender.email__',
+    /__receipt.sender.email__/g,
     receipt.sender.email
   );
   // _resultHtml = _resultHtml.replace('', receipt.approver.name);
@@ -67,57 +67,64 @@ export const getCompletedHtml = (_template, receipt) => {
   // _resultHtml = _resultHtml.replace('', receipt.approver.phoneNumber);
   // _resultHtml = _resultHtml.replace('', receipt.approver.email);
   _resultHtml = _resultHtml.replace(
-    '__receipt.receiver.name__',
+    /__receipt.receiver.name__/g,
     receipt.receiver.name
   );
   _resultHtml = _resultHtml.replace(
-    '__receipt.receiver_phoneNumber__',
+    /__receipt.receiver_phoneNumber__/g,
     receipt.receiver.phoneNumber
   );
   _resultHtml = _resultHtml.replace(
-    '__receipt.receiver.email__',
+    /__receipt.receiver.email__/g,
     receipt.receiver.email
   );
-  _resultHtml = _resultHtml.replace('__receipt.org.name__', receipt.org.name);
+  _resultHtml = _resultHtml.replace(/__receipt.org.name__/g, receipt.org.name);
   _resultHtml = _resultHtml.replace(
-    '__receipt.org.addressLine1__',
+    /__receipt.org.logoSrc__/g,
+    receipt.org.logoSrc
+  );
+  _resultHtml = _resultHtml.replace(
+    /__receipt.org.addressLine1__/g,
     receipt.org.addressLine1
   );
   _resultHtml = _resultHtml.replace(
-    '__receipt.org.addressLine2__',
+    /__receipt.org.addressLine2__/g,
     receipt.org.addressLine2
   );
   _resultHtml = _resultHtml.replace(
-    '__receipt.org.countryAndPincode__',
-    receipt.org.countryAndPincode
+    /__receipt.org.countryAndPincode__/g,
+    receipt.org.registeredCountry + ' ' + receipt.org.pincode
   );
   _resultHtml = _resultHtml.replace(
-    '__receipt.org.phoneNumber__',
+    /__receipt.org.phoneNumber__/g,
     receipt.org.phoneNumber
   );
-  _resultHtml = _resultHtml.replace('__receipt.org.email__', receipt.org.email);
   _resultHtml = _resultHtml.replace(
-    '__receipt.org.website__',
+    /__receipt.org.email__/g,
+    receipt.org.email
+  );
+  _resultHtml = _resultHtml.replace(
+    /__receipt.org.website__/g,
     receipt.org.website
   );
   _resultHtml = _resultHtml.replace(
-    '__receipt.donation.id__',
+    /__receipt.donation.id__/g,
     receipt.donation.id
   );
   _resultHtml = _resultHtml.replace(
-    '__receipt.donation.amount__',
+    /__receipt.donation.amount__/g,
     receipt.donation.amount
   );
   _resultHtml = _resultHtml.replace(
-    '__receipt.donation.date__',
+    /__receipt.donation.date__/g,
     receipt.donation.date
   );
   _resultHtml = _resultHtml.replace(
-    '__receipt.donation.description__',
+    /__receipt.donation.description__/g,
     receipt.donation.description
   );
   _resultHtml = _resultHtml.replace(
-    '__receipt.donation.footer__',
+    /__receipt.donation.footer__/g,
     receipt.donation.footer
   );
   return _resultHtml;

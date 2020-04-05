@@ -59,39 +59,59 @@ export default function Signup(props) {
         signupDetails.password
       )
       .then(authUser => {
-        const profile = { ...signupDetails, password: '' };
+        const profile = {
+          ...signupDetails,
+          password: '',
+          uid: authUser.user.uid,
+          lookupId: 1,
+        };
         delete profile.password;
         return service.service.db
-          .ref(`users/${signupDetails.userName}`)
+          .ref(`users/${signupDetails.userName.toLowerCase()}/profile`)
           .set(profile)
           .then(() => {
+            console.log(
+              'Sign Updetails before updateing to database',
+              signupDetails
+            );
             return authUser.user
               .updateProfile({
-                displayName: `${signupDetails.userName}#${signupDetails.name}`,
+                displayName: `${signupDetails.userName.toLowerCase()}#1#1`,
               })
               .then(() => {
                 setSignupDetails(INITIAL_STATE);
-                props.history.push('/addorg');
+                props.history.push({
+                  pathname: '/addorg',
+                  state: { signUpDetails: profile },
+                });
                 setIsLoading(false);
               })
               .catch(error => {
-                props.history.push('/addorg');
+                console.log('OHR1351 - ', error);
                 service.setSnackMessage(
-                  'User created but profile not updated properly'
+                  'OHR1316 - User created but profile not updated properly'
                 );
+                props.history.push({
+                  pathname: '/addorg',
+                  state: { signUpDetails: profile },
+                });
                 setIsLoading(false);
               });
           })
           .catch(error => {
-            props.history.push('/addorg');
+            console.log('OHR1320 - ', error);
+            props.history.push({
+              pathname: '/addorg',
+              state: { signUpDetails: profile },
+            });
             service.setSnackMessage(
-              'User created but profile not updated properly'
+              'OHR1320 - User created but profile not updated properly'
             );
             setIsLoading(false);
           });
       })
       .catch(error => {
-        service.setSnackMessage(error.message);
+        service.setSnackMessage('OHR1311' + error.message);
         setIsLoading(false);
       });
   };

@@ -39,18 +39,16 @@ export default function Index() {
 
   return (
     <NativeRouter>
-      {firebase.authUser && (
-        <View
-          style={{
-            height: Constants.statusBarHeight,
-            backgroundColor: firebase.theme.colors.primary,
-          }}
-        />
-      )}
+      <View
+        style={{
+          height: Constants.statusBarHeight,
+          backgroundColor: firebase.theme.colors.primary,
+        }}
+      />
       <BackButton>
         <Route exact path="/">
           {firebase.authUser ? (
-            <Redirect to="/template" />
+            <Redirect to="/dashboard/receipts" />
           ) : (
             <Redirect to="/signin" />
           )}

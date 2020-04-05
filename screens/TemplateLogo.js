@@ -25,16 +25,22 @@ import FirebaseContext from '../services/FirebaseContext';
 export default function TemplateLogo(props) {
   const serviceContext = useContext(FirebaseContext);
   const [image, setImage] = useState();
+  const [orgDetails, setOrgDetails] = useState();
 
   useEffect(() => {
     getPermissionAsync();
+    if (props.location.state && props.location.state.orgDetails) {
+      setOrgDetails(props.location.state.orgDetails);
+    }
   }, []);
 
   const getPermissionAsync = async () => {
     if (Constants.platform.ios) {
       const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
       if (status !== 'granted') {
-        alert('Sorry, we need camera roll permissions to make this work!');
+        serviceContext.setSnackMessage(
+          'Sorry, need camera roll permissions to make this work!'
+        );
       }
     }
   };
@@ -42,12 +48,25 @@ export default function TemplateLogo(props) {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
+      base64: true,
       aspect: [1, 1],
       quality: 1,
     });
     if (!result.cancelled) {
-      setImage(result.uri);
+      setImage(result);
     }
+  };
+
+  const navigateToTemplate = () => {
+    props.history.push({
+      pathname: '/template',
+      state: {
+        orgDetails: {
+          ...orgDetails,
+          logoSrc: image ? `data:image/jpg;base64,${image.base64}` : '',
+        },
+      },
+    });
   };
 
   return (
@@ -74,33 +93,29 @@ export default function TemplateLogo(props) {
         </Button>
         <View
           style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          {image && (
-            <Image
-              source={{ uri: image }}
-              style={{
-                width: 200,
-                height: 200,
-                marginTop: 50,
-                marginBottom: 50,
-              }}
-            />
-          )}
+          <Image
+            source={{
+              uri: image ? `data:image/jpg;base64,${image.base64}` : null,
+            }}
+            style={{
+              width: 200,
+              height: 200,
+              marginTop: 50,
+              marginBottom: 50,
+            }}
+          />
         </View>
       </Content>
       <Footer>
         <FooterTab
           style={{ backgroundColor: serviceContext.theme.colors.primary }}>
-          <Button
-            full
-            onPress={() => props.history.push('/dashboard/receipts')}>
+          <Button full onPress={() => navigateToTemplate()}>
             <Title>Skip</Title>
           </Button>
         </FooterTab>
         <FooterTab
           style={{ backgroundColor: serviceContext.theme.colors.primary }}>
-          <Button
-            full
-            onPress={() => props.history.push('/dashboard/receipts')}>
+          <Button full onPress={() => navigateToTemplate()}>
             <Title>Next</Title>
           </Button>
         </FooterTab>
