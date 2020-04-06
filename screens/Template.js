@@ -83,6 +83,12 @@ export default function Template(props) {
     }
   }, []);
 
+  useEffect(() => {
+    if (serviceContext.database == null) {
+      serviceContext.refreshDatabase();
+    }
+  }, []);
+
   const updateOrgDetailsToFirebase = _userName => {
     return serviceContext.service.db
       .ref('orgs/' + orgDetails.org.userName.toLowerCase())
@@ -98,7 +104,8 @@ export default function Template(props) {
       });
   };
   const updateOrgDetailsToDb = () => {
-    console.log('Updating org details to DB', orgDetails);
+    if (serviceContext.database == null)
+      console.log('Local database instance is null', serviceContext.database);
     return serviceContext.database.addOrg({
       ...orgDetails.org,
       sender: orgDetails.sender,
@@ -129,11 +136,12 @@ export default function Template(props) {
                 );
               });
           })
-          .catch(err =>
+          .catch(err => {
+            console.log('OHR1331', err);
             serviceContext.setSnackMessage(
               'OHR1331 - Some unexpected error occurred, and could not proceed. Please contact support.'
-            )
-          );
+            );
+          });
       })
       .catch(err =>
         serviceContext.setSnackMessage(

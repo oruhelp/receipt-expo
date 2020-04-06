@@ -33,6 +33,7 @@ export default function ShareReceipt(props) {
   const serviceContext = useContext(FirebaseContext);
 
   useEffect(() => {
+    console.log('Share receipt constructor', props.location.state.receipt);
     if (
       props.location.state &&
       props.location.state.receipt &&
@@ -43,6 +44,7 @@ export default function ShareReceipt(props) {
   }, []);
 
   const generateLink = () => {
+    console.log('Generating link with the details ', receipt);
     fetch('https://oru.li/api/shorturl/receipt', {
       method: 'POST',
       headers: {

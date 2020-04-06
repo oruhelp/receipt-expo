@@ -91,6 +91,7 @@ export default class Database {
 
   // Organization
   addOrg(_orgDetails) {
+    console.log('Adding ORG- database service -> ', _orgDetails);
     return this.executeQuery(
       'insert into ' +
         TABLE_ORGS +

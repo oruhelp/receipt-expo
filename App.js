@@ -37,6 +37,7 @@ export default function App() {
       setLoading(false);
     });
   }, []);
+
   useEffect(() => {
     if (contacts == null) {
       (async () => {
@@ -57,6 +58,17 @@ export default function App() {
       })();
     }
   });
+
+  useEffect(() => {
+    if (database == null && authUser != null) {
+      setDatabase(new Database(authUser.uid));
+    }
+  }, []);
+  const refreshDatabase = () => {
+    if (database == null) {
+      setDatabase(new Database(authUser.uid));
+    }
+  };
   return loading ? (
     <SplashScreen />
   ) : (
@@ -64,6 +76,7 @@ export default function App() {
       value={{
         service: firebase,
         database: database,
+        refreshDatabase: refreshDatabase,
         userName: userName,
         authUser: authUser,
         profile: profile,
