@@ -38,7 +38,6 @@ export default function ChangePassword(props) {
       </Header>
       <Content>
         <View style={{ width: '80%' }}>
-          <Image source={require('../assets/snack-logo.png')} />
           <Title>Change Password</Title>
           <Item floatingLabel s>
             <Label>Current Password</Label>

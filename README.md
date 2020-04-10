@@ -9,3 +9,9 @@ All projects created in Snack are publicly available, so you can easily share th
 If you're having problems, you can tweet to us [@expo](https://twitter.com/expo) or ask in our [forums](https://forums.expo.io).
 
 Snack is Open Source. You can find the code on the [GitHub repo](https://github.com/expo/snack-web).
+
+
+Keystore credentials
+  Keystore password: 85fa2d72ddef4796a13c6de646fe3297
+  Key alias:         QGthcnRoaWtleWFuLmxpdmUvcmVjZWlwdC0zLTk=
+  Key password:      4cd9996681e94e29bef2be1c7693d499

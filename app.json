@@ -1,28 +1,28 @@
 {
   "expo": {
-    "name": "receipt-3-9",
-    "description": "No description",
-    "slug": "snack-5c14a6b7-00f8-4ad9-bb13-63dec13aad51",
-    "privacy": "unlisted",
-    "sdkVersion": "36.0.0",
+    "description": "sqlite example in expo",
+    "scheme": "receipt-3-9",
+    "privacy": "public",
+    "platforms": ["ios", "android"],
+    "name": "Receipt Generator for NGOs",
+    "icon": "./assets/logo.png",
     "version": "1.0.0",
+    "slug": "receipt-3-9",
+    "sdkVersion": "36.0.0",
     "orientation": "portrait",
-    "primaryColor": "#cccccc",
-    "icon": "https://d1wp6m56sqw74a.cloudfront.net/~assets/c9aa1be8a6a6fe81e20c3ac4106a2ebc",
-    "loading": {
-      "icon": "https://d1wp6m56sqw74a.cloudfront.net/~assets/c9aa1be8a6a6fe81e20c3ac4106a2ebc",
-      "hideExponentText": false
-    },
-    "packagerOpts": {
-      "assetExts": [
-        "ttf",
-        "mp4",
-        "otf",
-        "xml"
-      ]
+    "primaryColor": "#ffffff",
+    "splash": {
+      "backgroundColor": "#ffffff",
+      "image": "./assets/splash.png",
+      "resizeMode": "contain"
     },
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.oruhelp.receipts",
+      "buildNumber": "1.0.0"
+    },
+    "android": {
+      "package": "com.oruhelp.receipts",
+      "versionCode": 1
     }
   }
 }
