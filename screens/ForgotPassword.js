@@ -38,11 +38,6 @@ export default function ForgotPassword(props) {
       marginTop: 10,
       backgroundColor: serviceContext.theme.colors.primary,
     },
-    logo: {
-      height: 128,
-      width: 128,
-      alignSelf: 'center',
-    },
     footer: {
       marginBottom: 10,
     },
@@ -51,10 +46,16 @@ export default function ForgotPassword(props) {
   return (
     <View style={styles.container}>
       <View style={{ width: '80%' }}>
-        <Image
-          style={styles.logo}
-          source={require('../assets/oruhelp-logo.png')}
-        />
+        <Text
+          style={{
+            alignSelf: 'center',
+            fontSize: 40,
+            marginTop: 20,
+            marginBottom: 20,
+            color: serviceContext.theme.colors.primary,
+          }}>
+          OruHelp
+        </Text>
         <Title style={styles.title}>Reset Password</Title>
         <Paragraph>
           Reset password link will be sent to the mail id. If you didn't

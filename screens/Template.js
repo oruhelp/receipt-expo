@@ -25,25 +25,26 @@ import { FlatList } from 'react-native';
 import { Surface } from 'react-native-paper';
 import Constants from 'expo-constants';
 import FirebaseContext from '../services/FirebaseContext';
+import { getDisplayTextOfRole } from '../constants/roles';
 import { templates, getCompletedHtml } from '../constants/templates/index';
 
 export default function Template(props) {
   const serviceContext = useContext(FirebaseContext);
   const [activeTemplate, setActiveTemplate] = useState(templates[0]);
-  const [orgDetails, setOrgDetails] = useState();
+  const [orgDetails, setOrgDetails] = useState({});
 
   useEffect(() => {
-    console.log(
-      'Template page, org details',
+    if (
+      props.location.state &&
+      props.location.state.orgDetails &&
       props.location.state.orgDetails.userDetails
-    );
-    if (props.location.state && props.location.state.orgDetails) {
+    ) {
       setOrgDetails({
         sender: {
           name: props.location.state.orgDetails.userDetails.name,
           phoneNumber: props.location.state.orgDetails.userDetails.phoneNumber,
           email: props.location.state.orgDetails.userDetails.email,
-          role: props.location.state.orgDetails.role,
+          role: getDisplayTextOfRole(props.location.state.orgDetails.role),
         },
         approver: {
           name: '',
@@ -75,11 +76,65 @@ export default function Template(props) {
         donation: {
           id: '1343',
           amount: '1000',
-          date: '04/Apr/2020',
+          date: new Date().toLocaleDateString(),
           description: 'This is donated for student education',
           footer: 'Thank you for your contribution',
         },
       });
+    } else if (
+      props.location.state &&
+      props.location.state.orgDetails &&
+      serviceContext.userName
+    ) {
+      serviceContext.service.db
+        .ref(`users/${serviceContext.userName}/profile`)
+        .once('value')
+        .then(function(snapshot) {
+          setOrgDetails({
+            sender: {
+              name: snapshot.val().name,
+              phoneNumber: snapshot.val().phoneNumber,
+              email: snapshot.val().email,
+              role: getDisplayTextOfRole(props.location.state.orgDetails.role),
+            },
+            approver: {
+              name: '',
+              role: '',
+              phoneNumber: '',
+              email: '',
+            },
+            receiver: {
+              name: 'Donar Name',
+              phoneNumber: '+91-1234567890',
+              email: 'noreply@oruhelp.com',
+            },
+            org: {
+              name: props.location.state.orgDetails.name,
+              addressLine1: props.location.state.orgDetails.addressLine1,
+              addressLine2: props.location.state.orgDetails.addressLine2,
+              registeredCountry:
+                props.location.state.orgDetails.registeredCountry,
+              pincode: props.location.state.orgDetails.pincode,
+              phoneNumber: props.location.state.orgDetails.phoneNumber,
+              email: props.location.state.orgDetails.email,
+              website: props.location.state.orgDetails.website,
+              logoSrc: props.location.state.orgDetails.logoSrc,
+              userName: props.location.state.orgDetails.userName,
+              registeredDate: props.location.state.orgDetails.registeredDate,
+              registeredNumber:
+                props.location.state.orgDetails.registeredNumber,
+              templateName: activeTemplate.id,
+              templateColor: props.location.state.orgDetails.templateColor,
+            },
+            donation: {
+              id: '1343',
+              amount: '1000',
+              date: new Date().toLocaleDateString(),
+              description: 'This is donated for student education',
+              footer: 'Thank you for your contribution',
+            },
+          });
+        });
     }
   }, []);
 
@@ -149,6 +204,14 @@ export default function Template(props) {
         )
       );
   };
+
+  const getHtml = () => {
+    if (orgDetails && orgDetails.sender && orgDetails.org) {
+      return getCompletedHtml(activeTemplate.html, orgDetails);
+    } else {
+      return '<h1>Loading<h1>';
+    }
+  };
   const styles = StyleSheet.create({
     surface: {
       margin: 8,
@@ -195,9 +258,7 @@ export default function Template(props) {
           originWhitelist={['*']}
           javaScriptEnabled={true}
           source={{
-            html: orgDetails
-              ? getCompletedHtml(activeTemplate.html, orgDetails)
-              : '<h1>Loading<h1>',
+            html: getHtml(),
           }}
         />
         <View>

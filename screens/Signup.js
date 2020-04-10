@@ -131,11 +131,6 @@ export default function Signup(props) {
       marginTop: 10,
       backgroundColor: service.theme.colors.primary,
     },
-    logo: {
-      height: 128,
-      width: 128,
-      alignSelf: 'center',
-    },
     footer: {
       marginBottom: 10,
     },
@@ -144,10 +139,16 @@ export default function Signup(props) {
   return (
     <View style={styles.container}>
       <View style={{ width: '80%' }}>
-        <Image
-          style={styles.logo}
-          source={require('../assets/oruhelp-logo.png')}
-        />
+        <Text
+          style={{
+            alignSelf: 'center',
+            fontSize: 40,
+            marginTop: 20,
+            marginBottom: 20,
+            color: service.theme.colors.primary,
+          }}>
+          OruHelp
+        </Text>
         <Item
           floatingLabel
           error={validator.name != '' && validator.name.failed}>

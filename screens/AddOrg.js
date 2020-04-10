@@ -7,14 +7,12 @@ import {
   Footer,
   FooterTab,
   Left,
-  Right,
   Body,
   Button,
   Icon,
   Picker,
   Form,
   Item,
-  Label,
   Input,
   List,
   ListItem,
@@ -26,27 +24,10 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scrollview'
 import { Paragraph, Divider } from 'react-native-paper';
 import Constants from 'expo-constants';
 import { countries } from '../constants/countries';
+import { roles } from '../constants/roles';
 import FirebaseContext from '../services/FirebaseContext';
 
 export default function AddOrg(props) {
-  const roles = [
-    {
-      value: 'president',
-      label: 'I am the President',
-    },
-    {
-      value: 'secretary',
-      label: 'I am the Secretary',
-    },
-    {
-      value: 'trustee',
-      label: 'I am a Trustee',
-    },
-    {
-      value: 'staff',
-      label: 'I am a Staff',
-    },
-  ];
   const INITIAL_STATE = {
     name: '',
     addressLine1: '',
@@ -70,22 +51,36 @@ export default function AddOrg(props) {
   const serviceContext = useContext(FirebaseContext);
 
   useEffect(() => {
-    console.log('displayName is ', serviceContext.authUser);
-    if (serviceContext.authUser.displayName == '')
+    // If displayName not updated earlier let it update now
+    if (
+      serviceContext.authUser.displayName == '' &&
+      props.location.state.signUpDetails
+    )
       serviceContext.authUser.updateProfile({
         displayName: `${props.location.state.signUpDetails.userName.toLowerCase()}#1#1`,
       });
   }, []);
-  
+
   const validate = () => {
+    console.log('Validating NGO details', ngoDetails);
     if (ngoDetails.name.length < 4) {
       serviceContext.setSnackMessage(
         'Organization Name should be minimum 4 characters'
       );
       return false;
     }
+    if (!/^[a-z0-9]+$/i.test(ngoDetails.userName)) {
+      serviceContext.setSnackMessage('Username should be alphanumeric');
+      return false;
+    }
     if (ngoDetails.userName.length < 4) {
       serviceContext.setSnackMessage('Username should be minimum 4 characters');
+      return false;
+    }
+    if (ngoDetails.userName.length > 15) {
+      serviceContext.setSnackMessage(
+        'Username should not be greater than 15 characters'
+      );
       return false;
     }
     if (validator.userName.failed) {
@@ -108,8 +103,8 @@ export default function AddOrg(props) {
       return false;
     }
 
-    if (ngoDetails.pincode.length < 1) {
-      serviceContext.setSnackMessage('Pincode should not be empty');
+    if (!/^[1-9][0-9]{5}$/.test(ngoDetails.pincode)) {
+      serviceContext.setSnackMessage('Not a valid Pincode');
       return false;
     }
 
@@ -137,6 +132,26 @@ export default function AddOrg(props) {
         userName: {
           failed: true,
           errorMessage: 'Username should be atlease 4 characters',
+        },
+      });
+      return false;
+    }
+    if (ngoDetails.userName.length > 15) {
+      setValidator({
+        ...validator,
+        userName: {
+          failed: true,
+          errorMessage: 'Username should not be greater than 15 characters',
+        },
+      });
+      return false;
+    }
+    if (!/^[a-z0-9]+$/i.test(ngoDetails.userName)) {
+      setValidator({
+        ...validator,
+        userName: {
+          failed: true,
+          errorMessage: 'Username should be alphanumeric',
         },
       });
       return false;
@@ -169,6 +184,7 @@ export default function AddOrg(props) {
     if (!validate()) {
       return false;
     }
+    console.log('From NGO page', ngoDetails);
     props.history.push({
       pathname: '/templatelogo',
       state: {
@@ -295,6 +311,7 @@ export default function AddOrg(props) {
           error={validator.pincode != '' && validator.pincode.failed}>
           <Input
             placeholder="Pincode"
+            keyboardType="number-pad"
             value={ngoDetails.pincode}
             onChangeText={_pincode =>
               setNgoDetails({
@@ -320,9 +337,9 @@ export default function AddOrg(props) {
               placeholderStyle={{ color: '#bfc6ea' }}
               placeholderIconColor="#007aff"
               selectedValue={ngoDetails.role}
-              onValueChange={_role =>
-                setNgoDetails({ ...ngoDetails, role: _role.value })
-              }>
+              onValueChange={_role => {
+                setNgoDetails({ ...ngoDetails, role: _role });
+              }}>
               {roles.map(role => (
                 <Picker.Item label={role.label} value={role.value} />
               ))}

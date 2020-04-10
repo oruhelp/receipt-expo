@@ -58,9 +58,11 @@ export default function Signin(props) {
       backgroundColor: serviceContext.theme.colors.primary,
     },
     logo: {
-      height: 128,
-      width: 128,
       alignSelf: 'center',
+      fontSize: 40,
+      marginTop: 20,
+      marginBottom: 20,
+      color: serviceContext.theme.colors.primary,
     },
     footer: {
       marginBottom: 10,
@@ -71,10 +73,17 @@ export default function Signin(props) {
   return (
     <View style={styles.container}>
       <View style={{ width: '80%' }}>
-        <Image
-          style={styles.logo}
-          source={require('../assets/oruhelp-logo.png')}
-        />
+        <Text
+          style={{
+            alignSelf: 'center',
+            fontSize: 40,
+            marginTop: 20,
+            marginBottom: 20,
+            color: serviceContext.theme.colors.primary,
+          }}>
+          OruHelp
+        </Text>
+
         <Item
           floatingLabel
           error={validator.email && validator.email.failed}

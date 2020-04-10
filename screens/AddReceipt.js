@@ -1,4 +1,4 @@
-import React, { Component, useState, useContext } from 'react';
+import React, { Component, useState, useContext, useEffect } from 'react';
 import {
   Container,
   Header,
@@ -21,7 +21,7 @@ import {
 import { Overlay } from 'react-native-elements';
 import { Paragraph } from 'react-native-paper';
 import { List, ListItem, Thumbnail } from 'native-base';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Alert } from 'react-native';
 import Constants from 'expo-constants';
 import FirebaseContext from '../services/FirebaseContext';
 import { NativeRouter, Route, Link } from 'react-router-native';
@@ -35,16 +35,75 @@ export default function AddReceipt(props) {
     donarId: '',
     donarName: '',
     amount: '',
-    notes: '',
-    footer: '',
+    notes: 'Donation',
+    footer: 'Thank you for your contribution.',
   });
   const [donarPicker, setDonarPicker] = useState(false);
   const [donars, setDonars] = useState([]);
+  const [autoReceiptNumber, setAutoReceiptNumber] = useState(true);
   const showPreview = () => {
     props.history.push({
       pathname: '/preview',
       state: { receipt: receipt },
     });
+  };
+
+  useEffect(() => {
+    serviceContext.database.getDonars().then(res => {
+      if (res.rows._array.length < 1) {
+        Alert.alert(
+          'No Donars',
+          'No donars available, please add a donar first.',
+          [
+            {
+              text: 'Cancel',
+              onPress: () => props.history.push('/dashboard/receipts'),
+              style: 'cancel',
+            },
+            { text: 'OK', onPress: () => props.history.push('/adddonar') },
+          ],
+          { cancelable: false }
+        );
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    setReceipt({
+      ...receipt,
+      number:
+        props.location.state &&
+        props.location.state.orgDetails &&
+        props.location.state.orgDetails.org.lastAutoReceiptNo.toString(),
+    });
+  }, []);
+
+  const validate = () => {
+    if (receipt.number == '') {
+      serviceContext.setSnackMessage('Receipt number should not be empty');
+      return false;
+    }
+    if (receipt.dateTime == '') {
+      serviceContext.setSnackMessage('Date should not be empty');
+      return false;
+    }
+    if (receipt.donarId == '' || receipt.donarName == '') {
+      serviceContext.setSnackMessage('Donar should be selected');
+      return false;
+    }
+    if (receipt.amount == '') {
+      serviceContext.setSnackMessage('Amount should not be empty');
+      return false;
+    }
+    if (!/^\d+$/.test(receipt.amount)) {
+      serviceContext.setSnackMessage('Amount should be numbers only');
+      return false;
+    }
+    if (receipt.notes == '') {
+      serviceContext.setSnackMessage('Description should not be empty');
+      return false;
+    }
+    return true;
   };
 
   const loadDonars = () => {
@@ -57,10 +116,24 @@ export default function AddReceipt(props) {
       .catch(err => console.log(err));
   };
   const addReceipt = () => {
+    if (!validate()) {
+      return;
+    }
     serviceContext.database
       .addReceipt(receipt)
       .then(res => {
-        props.history.push('/dashboard/receipts');
+        if (autoReceiptNumber) {
+          serviceContext.database
+            .updateReceiptNumber(parseInt(receipt.number) + 1)
+            .then(() => {
+              props.history.push('/dashboard/receipts');
+            })
+            .catch(_err => {
+              props.history.push('/dashboard/receipts');
+            });
+        } else {
+          props.history.push('/dashboard/receipts');
+        }
       })
       .catch(err => console.log(err));
   };
@@ -77,7 +150,6 @@ export default function AddReceipt(props) {
                 <ListItem
                   key={donar.id}
                   onPress={() => {
-                    console.log(donar);
                     setReceipt({
                       ...receipt,
                       donarId: donar.id,
@@ -113,9 +185,10 @@ export default function AddReceipt(props) {
               <Input
                 value={receipt.number}
                 keyboardType={'numeric'}
-                onChangeText={_number =>
-                  setReceipt({ ...receipt, number: _number })
-                }
+                onChangeText={_number => {
+                  setAutoReceiptNumber(false);
+                  setReceipt({ ...receipt, number: _number });
+                }}
               />
             </Item>
             <Item stackedLabel style={{ alignItems: 'flex-start' }}>

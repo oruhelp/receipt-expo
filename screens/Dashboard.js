@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 import { FAB, Avatar } from 'react-native-paper';
 import {
@@ -31,26 +31,72 @@ import Donars from './Donars';
 import { NativeRouter, Route, Link, BackButton } from 'react-router-native';
 
 export default function Dashboard(props) {
-  const routes = [
-    {
-      path: '/dashboard/receipts',
-      exact: true,
-      main: () => {
-        setActiveTab('receipts');
-        return <Receipts {...props} />;
-      },
-    },
-    {
-      path: '/dashboard/donars',
-      exact: true,
-      main: () => {
-        setActiveTab('donars');
-        return <Donars {...props} />;
-      },
-    },
-  ];
+  const [orgDetails, setOrgDetails] = useState();
   const [activeTab, setActiveTab] = useState();
   const serviceContext = useContext(FirebaseContext);
+
+  useEffect(() => {
+    if (serviceContext.database == null) {
+      serviceContext.refreshDatabase();
+    }
+    if (serviceContext.database != null) {
+      serviceContext.database.getActiveOrg().then(_res => {
+        if (_res.rows._array.length == 0) {
+          props.history.push('/addorg');
+        }
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    serviceContext.database
+      .getActiveOrg()
+      .then(res => {
+        const _detailsFromDB = res.rows._array[0];
+        const _value = {
+          sender: {
+            name: _detailsFromDB.senderName,
+            role: _detailsFromDB.role,
+            phoneNumber: _detailsFromDB.senderPhoneNumber,
+            email: _detailsFromDB.senderEmail,
+          },
+          org: {
+            name: _detailsFromDB.name,
+            addressLine1: _detailsFromDB.addressLine1,
+            addressLine2: _detailsFromDB.addressLine2,
+            registeredCountry: _detailsFromDB.registeredCountry,
+            pincode: _detailsFromDB.pincode,
+            countryAndPincode:
+              _detailsFromDB.registeredCountry + ',' + _detailsFromDB.pincode,
+            phoneNumber: _detailsFromDB.phoneNumber
+              ? _detailsFromDB.phoneNumber
+              : '',
+            email: _detailsFromDB.email ? _detailsFromDB.email : '',
+            website: _detailsFromDB.website ? _detailsFromDB.website : '',
+            logoSrc: _detailsFromDB.logoSrc,
+            lastAutoReceiptNo: _detailsFromDB.lastAutoReceiptNo,
+            userName: _detailsFromDB.userName,
+            registeredDate: _detailsFromDB.registeredDate,
+            registeredNumber: _detailsFromDB.registeredNumber,
+            templateName: _detailsFromDB.templateName,
+            lookupId: _detailsFromDB.lookupId,
+          },
+        };
+        setOrgDetails(_value);
+      })
+      .catch(err => {
+        // !userDetails &&
+        //   serviceContext.service.db
+        //     .ref('/users/' + serviceContext.userName + '/profile/')
+        //     .once('value')
+        //     .then(function(snapshot) {
+        //       setReceiptDetails({
+        //         ...receiptDetails,
+        //         sender: { ...receiptDetails.sender, ...snapshot },
+        //       });
+        //     });
+      });
+  }, []);
 
   const closeControlPanel = () => {
     this._drawer.close();
@@ -84,7 +130,7 @@ export default function Dashboard(props) {
         main: { opacity: (2 - ratio) / 2 },
       })}
       ref={ref => (this._drawer = ref)}
-      content={<SideBarContent {...props} />}>
+      content={<SideBarContent {...props} orgDetails={orgDetails} />}>
       <Container>
         <Header
           style={{ backgroundColor: serviceContext.theme.colors.primary }}>
@@ -99,14 +145,22 @@ export default function Dashboard(props) {
           <Right />
         </Header>
         <Content>
-          {routes.map((route, index) => (
-            <Route
-              key={index}
-              path={route.path}
-              exact={route.exact}
-              component={route.main}
-            />
-          ))}
+          <Route
+            path="/dashboard/receipts"
+            exact={true}
+            component={() => {
+              setActiveTab('receipts');
+              return <Receipts {...props} orgDetails={orgDetails} />;
+            }}
+          />
+          <Route
+            path="/dashboard/donars"
+            exact={true}
+            component={() => {
+              setActiveTab('donars');
+              return <Donars {...props} orgDetails={orgDetails} />;
+            }}
+          />
         </Content>
         <FAB
           style={styles.fab}
@@ -115,8 +169,18 @@ export default function Dashboard(props) {
           )}
           onPress={() =>
             activeTab === 'receipts'
-              ? props.history.push('/addreceipt')
-              : props.history.push('/adddonar')
+              ? props.history.push({
+                  pathname: '/addreceipt',
+                  state: {
+                    orgDetails: orgDetails,
+                  },
+                })
+              : props.history.push({
+                  pathname: '/adddonar',
+                  state: {
+                    orgDetails: orgDetails,
+                  },
+                })
           }
         />
         <Footer>

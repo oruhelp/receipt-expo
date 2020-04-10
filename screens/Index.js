@@ -1,5 +1,5 @@
-import React, { useContext, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useContext, useState, useEffect } from 'react';
+import { StyleSheet, Text, View, Platform } from 'react-native';
 import {
   NativeRouter,
   Route,
@@ -28,6 +28,7 @@ import Signin from './Signin';
 import Signup from './Signup';
 import SplashScreen from './SplashScreen';
 import Help from './Help';
+import Profile from './Profile';
 import Template from './Template';
 import TemplateColor from './TemplateColor';
 import TemplateLogo from './TemplateLogo';
@@ -35,19 +36,19 @@ import Constants from 'expo-constants';
 import FirebaseContext from '../services/FirebaseContext';
 
 export default function Index() {
-  const firebase = useContext(FirebaseContext);
+  const serviceContext = useContext(FirebaseContext);
 
   return (
     <NativeRouter>
       <View
         style={{
-          height: Constants.statusBarHeight,
-          backgroundColor: firebase.theme.colors.primary,
+          height: Platform.OS === 'ios' ? 0 : Constants.statusBarHeight,
+          backgroundColor: serviceContext.theme.colors.primary,
         }}
       />
       <BackButton>
         <Route exact path="/">
-          {firebase.authUser ? (
+          {serviceContext.authUser ? (
             <Redirect to="/dashboard/receipts" />
           ) : (
             <Redirect to="/signin" />
@@ -75,6 +76,7 @@ export default function Index() {
         <Route exact path="/template" component={Template} />
         <Route exact path="/templatecolor" component={TemplateColor} />
         <Route exact path="/templatelogo" component={TemplateLogo} />
+        <Route exact path="/profile" component={Profile} />
       </BackButton>
     </NativeRouter>
   );

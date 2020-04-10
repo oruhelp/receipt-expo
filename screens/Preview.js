@@ -27,11 +27,6 @@ import { templates, getCompletedHtml } from '../constants/templates/index';
 export default function Preview(props) {
   const serviceContext = useContext(FirebaseContext);
 
-  useEffect(() => {
-    props.location.state &&
-      props.location.state.receipt &&
-      console.log('Preview receipt using ->', props.location.state.receipt);
-  }, []);
   return (
     <Container>
       <Header style={{ backgroundColor: serviceContext.theme.colors.primary }}>

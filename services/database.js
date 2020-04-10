@@ -20,7 +20,7 @@ export default class Database {
     this.executeQuery(
       'create table if not exists ' +
         TABLE_ORGS +
-        ' (id integer primary key autoincrement, name text, addressLine1 text, addressLine2 text, registeredCountry text, pincode text, role text, phoneNumber text, email text, website text, userName text, registeredDate text, registeredNumber text, active integer, templateName text, templateColor text, logoSrc text, lookupId integer, senderName text, senderPhoneNumber text, senderEmail text);',
+        ' (id integer primary key autoincrement, name text, addressLine1 text, addressLine2 text, registeredCountry text, pincode text, role text, phoneNumber text, email text, website text, userName text, registeredDate text, registeredNumber text, active integer, templateName text, templateColor text, logoSrc text, lookupId integer, senderName text, senderPhoneNumber text, senderEmail text, lastAutoReceiptNo integer);',
       []
     );
 
@@ -91,11 +91,10 @@ export default class Database {
 
   // Organization
   addOrg(_orgDetails) {
-    console.log('Adding ORG- database service -> ', _orgDetails);
     return this.executeQuery(
       'insert into ' +
         TABLE_ORGS +
-        ' (name, addressLine1, addressLine2, registeredCountry, pincode, role, phoneNumber, email, website, userName, registeredDate, registeredNumber, active, templateName, templateColor, logoSrc, lookupId, senderName, senderPhoneNumber, senderEmail) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?, ?)',
+        ' (name, addressLine1, addressLine2, registeredCountry, pincode, role, phoneNumber, email, website, userName, registeredDate, registeredNumber, active, templateName, templateColor, logoSrc, lookupId, senderName, senderPhoneNumber, senderEmail, lastAutoReceiptNo) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?, ?, ?)',
       [
         _orgDetails.name,
         _orgDetails.addressLine1,
@@ -117,6 +116,7 @@ export default class Database {
         _orgDetails.sender.name,
         _orgDetails.sender.phoneNumber,
         _orgDetails.sender.email,
+        1,
       ]
     );
   }
@@ -125,8 +125,38 @@ export default class Database {
       'select * from ' + TABLE_ORGS + ' where active = 1'
     );
   }
-  updateOrg() {
-    return this.executeQuery('');
+  updateReceiptNumber(_newReceiptNumber) {
+    return this.executeQuery(
+      'update ' +
+        TABLE_ORGS +
+        ' set lastAutoReceiptNo = ' +
+        _newReceiptNumber +
+        ' where active = 1'
+    );
+  }
+  updateOrg(_orgDetails) {
+    return this.executeQuery(
+      'update ' +
+        TABLE_ORGS +
+        ` set name = '${_orgDetails.name}', addressLine1 = '${
+          _orgDetails.addressLine1
+        }', addressLine2 = '${
+          _orgDetails.addressLine2
+        }', registeredCountry = '${
+          _orgDetails.registeredCountry
+        }', lookupId = ${_orgDetails.lookupId}, pincode = '${
+          _orgDetails.pincode
+        }', role = '${_orgDetails.sender.role}', phoneNumber = '${
+          _orgDetails.phoneNumber
+        }', email = '${_orgDetails.email}', website = '${
+          _orgDetails.website
+        }', logoSrc = '${_orgDetails.logoSrc}', senderName = '${
+          _orgDetails.sender.name
+        }', senderPhoneNumber = '${
+          _orgDetails.sender.phoneNumber
+        }', senderEmail = '${_orgDetails.sender.email}' where active = 1`,
+      []
+    );
   }
   deleteOrg() {
     return this.executeQuery('');
@@ -140,9 +170,8 @@ export default class Database {
     return this.executeQuery(
       'insert into ' +
         TABLE_RECEIPTS +
-        ' (id, number, dateTime, donarId, amount, notes, footer) values (?, ?, ?, ?, ?, ?, ?)',
+        ' (number, dateTime, donarId, amount, notes, footer) values (?, ?, ?, ?, ?, ?)',
       [
-        parseInt(_receipt.number),
         _receipt.number,
         _receipt.dateTime,
         _receipt.donarId.toString(),

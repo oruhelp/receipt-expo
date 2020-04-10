@@ -41,14 +41,28 @@ export default function AddDonar(props) {
   };
   const [contact, setContact] = useState(INITIAL_STATE);
   const [validator, setValidator] = useState(INITIAL_STATE);
+  const [loadingContacts, setLoadingContacts] = useState(false);
 
   useEffect(() => {
     if (props.location.state && props.location.state.contact) {
       setContact({
+        ...contact,
         name: props.location.state.contact.name,
-        number: '',
-        email: '',
-        website: '',
+        number:
+          props.location.state.contact.phoneNumbers &&
+          props.location.state.contact.phoneNumbers.length > 0
+            ? props.location.state.contact.phoneNumbers[0].number
+            : '',
+        email:
+          props.location.state.contact.emails &&
+          props.location.state.contact.emails.length > 0
+            ? props.location.state.contact.emails[0].email
+            : '',
+        website:
+          props.location.state.contact.urlAddresses &&
+          props.location.state.contact.urlAddresses.length > 0
+            ? props.location.state.contact.urlAddresses[0].url
+            : '',
         contactBookId: props.location.state.contact.id,
       });
     }
@@ -61,6 +75,38 @@ export default function AddDonar(props) {
     }
     if (contact.number == '' && contact.email == '') {
       serviceContext.setSnackMessage('Phone number or email is required');
+      return false;
+    }
+    if (
+      contact.number != '' &&
+      !/^\d+$/.test(
+        contact.number
+          .replace('+', '')
+          .replace('(', '')
+          .replace(')', '')
+          .replace(' ', '')
+      )
+    ) {
+      serviceContext.setSnackMessage('Not a valid phone number');
+      return false;
+    }
+    if (
+      contact.email != '' &&
+      !/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
+        String(contact.email).toLowerCase()
+      )
+    ) {
+      serviceContext.setSnackMessage('Not a valid email');
+      return false;
+    }
+
+    if (
+      contact.website != '' &&
+      !/(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/gi.test(
+        String(contact.website).toLowerCase()
+      )
+    ) {
+      serviceContext.setSnackMessage('Not a valid website');
       return false;
     }
     return true;
@@ -78,16 +124,11 @@ export default function AddDonar(props) {
       .catch(err => console.log(err));
   };
   const importFromContacts = () => {
-    //     <Button
-    //       bordered
-    //       small
-    //       full
-    //       rounded
-    //       onPress={() => importFromContacts()}>
-    //       <Text>Import from contacts</Text>
-    //     </Button>
+    setLoadingContacts(true);
+    if (loadingContacts) return;
     if (serviceContext.contacts != null) {
       if (serviceContext.contacts.length > 0) {
+        setLoadingContacts(false);
         props.history.push({
           pathname: '/contactsearch',
           state: { contacts: serviceContext.contacts },
@@ -106,12 +147,14 @@ export default function AddDonar(props) {
           });
 
           if (data.length > 0) {
+            setLoadingContacts(false);
             props.history.push({
               pathname: '/contactsearch',
               state: { contacts: data },
             });
           }
         } else {
+          setLoadingContacts(false);
           serviceContext.setSnackMessage(
             'Give permission to access the contacts.'
           );
@@ -123,7 +166,9 @@ export default function AddDonar(props) {
     <Container>
       <Header style={{ backgroundColor: serviceContext.theme.colors.primary }}>
         <Left>
-          <Button transparent onPress={() => props.history.goBack()}>
+          <Button
+            transparent
+            onPress={() => props.history.push('/dashboard/donars')}>
             <Icon name="close" />
           </Button>
         </Left>
@@ -140,8 +185,8 @@ export default function AddDonar(props) {
               error={validator.name != '' && validator.name.failed}>
               <Label>Name</Label>
               <Input
-                value={contact && contact.name}
-                onValueChange={_name => {
+                value={contact.name}
+                onChangeText={_name => {
                   setContact({ ...contact, name: _name });
                 }}
               />
@@ -154,94 +199,92 @@ export default function AddDonar(props) {
                 />
               )}
             </Item>
-            {props.location.state.contact ? (
-              props.location.state.contact.phoneNumbers &&
-              props.location.state.contact.phoneNumbers.length > 0 && (
-                <Item>
-                  <Label>Phone</Label>
-                  <Picker
-                    note
-                    mode="dropdown"
-                    selectedValue={contact.number}
-                    onValueChange={_number => {
-                      setContact({ ...contact, number: _number });
-                    }}>
-                    {props.location.state.contact.phoneNumbers.map(
-                      _phoneNumber => (
-                        <Picker.Item
-                          label={_phoneNumber.number}
-                          value={_phoneNumber.number}
-                        />
-                      )
-                    )}
-                  </Picker>
-                </Item>
-              )
+            {props.location.state.contact &&
+            props.location.state.contact.phoneNumbers &&
+            props.location.state.contact.phoneNumbers.length > 0 ? (
+              <Item>
+                <Label>Phone</Label>
+                <Picker
+                  note
+                  mode="dropdown"
+                  selectedValue={contact.number}
+                  onValueChange={_number => {
+                    setContact({ ...contact, number: _number });
+                  }}>
+                  {props.location.state.contact.phoneNumbers.map(
+                    _phoneNumber => (
+                      <Picker.Item
+                        label={_phoneNumber.number}
+                        value={_phoneNumber.number}
+                      />
+                    )
+                  )}
+                </Picker>
+              </Item>
             ) : (
-              <Item floatingLabel last>
+              <Item stackedLabel last>
                 <Label>Phone Number</Label>
                 <Input
                   value={contact.number}
-                  onValueChange={_number => {
+                  keyboardType={'numeric'}
+                  onChangeText={_number => {
                     setContact({ ...contact, number: _number });
                   }}
                 />
               </Item>
             )}
-            {props.location.state.contact ? (
-              props.location.state.contact.emails &&
-              props.location.state.contact.emails.length > 0 && (
-                <Item>
-                  <Label>Email</Label>
-                  <Picker
-                    note
-                    mode="dropdown"
-                    selectedValue={contact.email}
-                    onValueChange={_email => {
-                      setContact({ ...contact, email: _email });
-                    }}>
-                    {props.location.state.contact.emails.map(_email => (
-                      <Picker.Item label={_email.email} value={_email.email} />
-                    ))}
-                  </Picker>
-                </Item>
-              )
+            {props.location.state.contact &&
+            props.location.state.contact.emails &&
+            props.location.state.contact.emails.length > 0 ? (
+              <Item>
+                <Label>Email</Label>
+                <Picker
+                  note
+                  mode="dropdown"
+                  selectedValue={contact.email}
+                  onValueChange={_email => {
+                    setContact({ ...contact, email: _email });
+                  }}>
+                  {props.location.state.contact.emails.map(_email => (
+                    <Picker.Item label={_email.email} value={_email.email} />
+                  ))}
+                </Picker>
+              </Item>
             ) : (
-              <Item floatingLabel last>
+              <Item stackedLabel last>
                 <Label>Email</Label>
                 <Input
+                  keyboardType={'email-address'}
                   value={contact.email}
-                  onValueChange={_email => {
+                  onChangeText={_email => {
                     setContact({ ...contact, email: _email });
                   }}
                 />
               </Item>
             )}
-            {props.location.state.contact ? (
-              props.location.state.contact.urlAddresses &&
-              props.location.state.contact.urlAddresses.length > 0 &&
-              props.location.state.contact.urlAddresses.map(urlAddress => (
-                <Item floatingLabel last>
-                  <Label>Website</Label>
-                  <Picker
-                    note
-                    mode="dropdown"
-                    selectedValue={contact.website}
-                    onValueChange={_url => {
-                      setContact({ ...contact, website: _url });
-                    }}>
-                    {props.location.state.contact.urlAddress.map(_url => (
-                      <Picker.Item label={_url.url} value={_url.url} />
-                    ))}
-                  </Picker>
-                </Item>
-              ))
+            {props.location.state.contact &&
+            props.location.state.contact.urlAddresses &&
+            props.location.state.contact.urlAddresses.length > 0 ? (
+              <Item>
+                <Label>Website</Label>
+                <Picker
+                  note
+                  mode="dropdown"
+                  selectedValue={contact.website}
+                  onValueChange={_url => {
+                    setContact({ ...contact, website: _url });
+                  }}>
+                  {props.location.state.contact.urlAddresses.map(_url => (
+                    <Picker.Item label={_url.url} value={_url.url} />
+                  ))}
+                </Picker>
+              </Item>
             ) : (
-              <Item floatingLabel last>
+              <Item stackedLabel last>
                 <Label>Website</Label>
                 <Input
                   value={contact.website}
-                  onValueChange={_website => {
+                  onChangeText={_website => {
                     setContact({ ...contact, website: _website });
                   }}
                 />
@@ -250,6 +293,16 @@ export default function AddDonar(props) {
           </Form>
         ) : (
           <Form>
+            <Button
+              bordered
+              small
+              full
+              rounded
+              onPress={() => importFromContacts()}>
+              <Text>
+                {loadingContacts ? 'Loading...' : 'Import from contacts'}
+              </Text>
+            </Button>
             <Item floatingLabel>
               <Label>Name</Label>
               <Input
@@ -263,6 +316,7 @@ export default function AddDonar(props) {
             <Item floatingLabel last>
               <Label>Phone Number</Label>
               <Input
+                keyboardType={'numeric'}
                 value={contact.number}
                 onChangeText={_number => {
                   setContact({ ...contact, number: _number });
@@ -274,6 +328,7 @@ export default function AddDonar(props) {
             <Item floatingLabel last>
               <Label>Email</Label>
               <Input
+                keyboardType={'email-address'}
                 value={contact.email}
                 onChangeText={_email => {
                   setContact({ ...contact, email: _email });

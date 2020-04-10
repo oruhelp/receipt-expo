@@ -81,39 +81,46 @@ export default function Donar(props) {
           <Caption>Name</Caption>
           <Subheading>{contact && contact.name}</Subheading>
         </View>
-        <View style={styles.elements}>
-          <Caption>Number</Caption>
-          <Subheading>{contact && contact.number}</Subheading>
-        </View>
-        <View style={styles.elements}>
-          <Caption>Email</Caption>
-          <Subheading>{contact && contact.email}</Subheading>
-        </View>
-        <View style={styles.elements}>
-          <Caption>Website</Caption>
-          <Subheading>{contact && contact.website}</Subheading>
-        </View>
+        {contact && contact.number != '' && (
+          <View style={styles.elements}>
+            <Caption>Number</Caption>
+            <Subheading>{contact && contact.number}</Subheading>
+          </View>
+        )}
+        {contact && contact.email != '' && (
+          <View style={styles.elements}>
+            <Caption>Email</Caption>
+            <Subheading>{contact && contact.email}</Subheading>
+          </View>
+        )}
+        {contact && contact.website != '' && (
+          <View style={styles.elements}>
+            <Caption>Website</Caption>
+            <Subheading>{contact && contact.website}</Subheading>
+          </View>
+        )}
         <Divider style={styles.divider} />
         <List>
-          <ListItem itemHeader style={{ paddingBottom: 0, paddingTop: 20 }}>
-            <Body style={{ alignItems: 'center' }}>
-              <Text note>Donation History</Text>
-            </Body>
-          </ListItem>
           {donations &&
             donations.length > 0 &&
-            donations.map(donation => (
-              <ListItem>
-                <Body>
-                  <Subheading>Rs.{donation.amount}/-</Subheading>
-                </Body>
-                <Right>
-                  <Text note>
-                    {new Date(donation.dateTime).toLocaleDateString()}
-                  </Text>
-                </Right>
-              </ListItem>
-            ))}
+            <ListItem itemHeader style={{ paddingBottom: 0, paddingTop: 20 }}>
+              <Body style={{ alignItems: 'center' }}>
+                <Text note>Donation History</Text>
+              </Body>
+            </ListItem>(
+              donations.map(donation => (
+                <ListItem>
+                  <Body>
+                    <Subheading>Rs.{donation.amount}/-</Subheading>
+                  </Body>
+                  <Right>
+                    <Text note>
+                      {new Date(donation.dateTime).toLocaleDateString()}
+                    </Text>
+                  </Right>
+                </ListItem>
+              ))
+            )}
         </List>
       </Content>
     </Container>

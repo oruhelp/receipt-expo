@@ -35,11 +35,11 @@ export default function Settings(props) {
         <Right />
       </Header>
       <Content style={styles.paragraph}>
-        <Button
+         <Button
           primary
           bordered
           style={styles.button}
-          onPress={() => props.history.push("/changepassword")}>
+          onPress={() => props.history.push('/changepassword')}>
           <Text> Change Password </Text>
         </Button>
       </Content>
@@ -50,5 +50,9 @@ export default function Settings(props) {
 const styles = StyleSheet.create({
   paragraph: {
     margin: 10,
+  },
+  button: {
+    margin: 5,
+    justifyContent: 'center',
   },
 });

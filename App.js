@@ -47,7 +47,7 @@ export default function App() {
             fields: [
               Contacts.PHONE_NUMBERS,
               Contacts.Fields.Emails,
-              Contacts.Fields.UrlAddrFirebaseContextesses,
+              Contacts.Fields.UrlAddresses,
             ],
           });
 
@@ -65,7 +65,7 @@ export default function App() {
     }
   }, []);
   const refreshDatabase = () => {
-    if (database == null) {
+    if (database == null && authUser != null) {
       setDatabase(new Database(authUser.uid));
     }
   };
