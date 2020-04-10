@@ -68,7 +68,7 @@ export default function ContactSearch(props) {
           )}
         </Item>
       </Header>
-      <Content>
+      <Content enableOnAndroid>
         {searching && (
           <Provider>
             <Portal>

@@ -34,7 +34,6 @@ export default function Donar(props) {
   const [openMenu, setOpenMenu] = useState(false);
 
   const serviceContext = useContext(FirebaseContext);
-  const db = openDatabase('db');
   useEffect(() => {
     if (props.location.state && props.location.state.donar) {
       setContact(props.location.state.donar);
@@ -70,13 +69,9 @@ export default function Donar(props) {
         <Body>
           <Title>{contact && contact.name}</Title>
         </Body>
-        <Right>
-          <Button transparent onPress={() => setOpenMenu(true)}>
-            <Icon name="md-more" />
-          </Button>
-        </Right>
+        <Right />
       </Header>
-      <Content style={styles.paragraph}>
+      <Content style={styles.paragraph} enableOnAndroid>
         <View style={styles.elements}>
           <Caption>Name</Caption>
           <Subheading>{contact && contact.name}</Subheading>

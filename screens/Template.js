@@ -32,6 +32,7 @@ export default function Template(props) {
   const serviceContext = useContext(FirebaseContext);
   const [activeTemplate, setActiveTemplate] = useState(templates[0]);
   const [orgDetails, setOrgDetails] = useState({});
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (
@@ -167,42 +168,45 @@ export default function Template(props) {
     });
   };
   const updateOrgDetailsToUserInFirebase = _userName => {
-    console.log('userName', _userName);
     return serviceContext.service.db.ref('users/' + _userName + '/orgs').set({
       [orgDetails.org.userName]: orgDetails.sender.role,
     });
   };
   const registerOrg = () => {
+    if (loading) {
+      return;
+    }
+    setLoading(true);
     const _userName = serviceContext.authUser.displayName.split('#')[0];
     return updateOrgDetailsToUserInFirebase(_userName)
       .then(() => {
         return updateOrgDetailsToFirebase(_userName)
           .then(() => {
-            console.log('Updating ORG details to database');
             return updateOrgDetailsToDb()
               .then(res => {
-                console.log('Updated ORG details to database', res);
+                setLoading(false);
                 props.history.push('/dashboard/receipts');
               })
               .catch(err => {
-                console.log('Erro updated ORG details to database', err);
+                setLoading(false);
                 serviceContext.setSnackMessage(
                   'OHR1330 - Some unexpected error occurred, and could not proceed. Please contact support.'
                 );
               });
           })
           .catch(err => {
-            console.log('OHR1331', err);
+            setLoading(false);
             serviceContext.setSnackMessage(
               'OHR1331 - Some unexpected error occurred, and could not proceed. Please contact support.'
             );
           });
       })
-      .catch(err =>
+      .catch(err => {
+        setLoading(false);
         serviceContext.setSnackMessage(
           'OHR1332 - Some unexpected error occurred, and could not proceed. Please contact support.'
-        )
-      );
+        );
+      });
   };
 
   const getHtml = () => {
@@ -286,7 +290,7 @@ export default function Template(props) {
         <FooterTab
           style={{ backgroundColor: serviceContext.theme.colors.primary }}>
           <Button full onPress={() => registerOrg()}>
-            <Title>Register</Title>
+            <Title>{loading ? 'Loading..' : 'Register'}</Title>
           </Button>
         </FooterTab>
       </Footer>

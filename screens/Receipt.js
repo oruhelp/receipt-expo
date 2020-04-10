@@ -84,7 +84,7 @@ export default function Receipt(props) {
         </Body>
         <Right />
       </Header>
-      <Content>
+      <Content enableOnAndroid>
         <Form>
           <Item stackedLabel>
             <Label>Invoice Number</Label>
@@ -96,9 +96,7 @@ export default function Receipt(props) {
           <Item stackedLabel>
             <Label>Date</Label>
             <Input
-              value={new Date(
-                receipt && receipt.donation.dateTime
-              ).toLocaleDateString()}
+              value={receipt && receipt.donation && receipt.donation.date}
               editable={false}
             />
           </Item>

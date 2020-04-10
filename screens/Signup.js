@@ -1,5 +1,12 @@
 import React, { useContext, useState } from 'react';
-import { Text, View, StyleSheet, Image, Keyboard } from 'react-native';
+import {
+  Text,
+  View,
+  StyleSheet,
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+} from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { Button } from 'react-native-paper';
 import { Title, Paragraph, Divider } from 'react-native-paper';
@@ -138,7 +145,7 @@ export default function Signup(props) {
 
   return (
     <View style={styles.container}>
-      <View style={{ width: '80%' }}>
+      <KeyboardAvoidingView behavior="padding" enabled style={{ width: '80%' }}>
         <Text
           style={{
             alignSelf: 'center',
@@ -254,7 +261,7 @@ export default function Signup(props) {
         <Button mode="contained" style={styles.button} onPress={() => signup()}>
           {isLoading ? 'Loading..' : 'Sign Up'}
         </Button>
-      </View>
+      </KeyboardAvoidingView>
       <View style={styles.footer}>
         <Paragraph>Already have a OruHelp account?</Paragraph>
         <Button

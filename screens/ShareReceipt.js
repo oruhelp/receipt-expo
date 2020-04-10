@@ -30,6 +30,7 @@ import Expo from 'expo';
 export default function ShareReceipt(props) {
   const [receipt, setReceipt] = useState(null);
   const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
   const serviceContext = useContext(FirebaseContext);
 
   useEffect(() => {
@@ -44,7 +45,10 @@ export default function ShareReceipt(props) {
   }, []);
 
   const generateLink = () => {
-    console.log('Generating link with the details ', receipt);
+    setLoading(true);
+    if (loading) {
+      return;
+    }
     fetch('https://oru.li/api/shorturl/receipt', {
       method: 'POST',
       headers: {
@@ -63,16 +67,19 @@ export default function ShareReceipt(props) {
               ...receipt,
               donation: { ...receipt.donation, shortUrl: _shortUrl },
             });
+            setLoading(false);
           })
           .catch(err => {
             setReceipt({
               ...receipt,
               donation: { ...receipt.donation, shortUrl: _shortUrl },
             });
+            setLoading(false);
             serviceContext.setSnackMessage('Short URL generated but not saved');
           });
       })
       .catch(error => {
+        setLoading(false);
         console.error(error);
       });
   };
@@ -196,13 +203,28 @@ export default function ShareReceipt(props) {
           }>
           <Text
             uppercase={
-              !(receipt && receipt.donation && receipt.donation.shortUrl)
+              loading
+                ? false
+                : !(receipt && receipt.donation && receipt.donation.shortUrl)
             }>
-            {receipt && receipt.donation && receipt.donation.shortUrl
+            {loading
+              ? 'Loading...'
+              : receipt && receipt.donation && receipt.donation.shortUrl
               ? receipt.donation.shortUrl
               : 'Generate receipt link'}
           </Text>
         </Button>
+        {receipt && receipt.donation && receipt.donation.shortUrl && (
+          <Button
+            primary
+            bordered
+            style={styles.button}
+            onPress={() => generateLink()}>
+            <Text uppercase={!loading}>
+              {loading ? 'Loading...' : 'Generate new receipt link'}
+            </Text>
+          </Button>
+        )}
 
         <Button
           primary

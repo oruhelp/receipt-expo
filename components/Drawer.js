@@ -104,16 +104,16 @@ export default function SideBarContent(props) {
         <Button
           transparent
           style={{ justifyContent: 'flex-start' }}
-          onPress={() => props.history.push('/buypremium')}>
-          <Icon name="heart" style={styles.icon} />
-          <Text style={styles.listButton}>Sponsor</Text>
+          onPress={() => props.history.push('/help')}>
+          <Icon name="help-circle" style={styles.icon} />
+          <Text style={styles.listButton}>FAQs</Text>
         </Button>
         <Button
           transparent
           style={{ justifyContent: 'flex-start' }}
-          onPress={() => props.history.push('/help')}>
-          <Icon name="help-circle" style={styles.icon} />
-          <Text style={styles.listButton}>Help</Text>
+          onPress={() => props.history.push('/buypremium')}>
+          <Icon name="heart" style={styles.icon} />
+          <Text style={styles.listButton}>Sponsor</Text>
         </Button>
         <Button
           transparent

@@ -1,5 +1,13 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { Text, View, StyleSheet, Image, Alert, ScrollView } from 'react-native';
+import {
+  Text,
+  View,
+  StyleSheet,
+  Image,
+  Alert,
+  ScrollView,
+  KeyboardAvoidingView,
+} from 'react-native';
 import {
   Container,
   Header,
@@ -207,7 +215,7 @@ export default function AddOrg(props) {
           <Title>Add Organization</Title>
         </Body>
       </Header>
-      <Content style={styles.paragraph}>
+      <Content style={styles.paragraph} enableOnAndroid>
         <Item
           style={styles.element}
           error={validator.name != '' && validator.name.failed}>

@@ -4,8 +4,6 @@ import { template3 } from './template3.js';
 
 export const templates = [
   { name: 'Simple Blue', id: 'template1', html: template1 },
-  { name: 'Certificate', id: 'template2', html: template2 },
-  { name: 'Lite', id: 'template3', html: template3 },
 ];
 
 const data = {

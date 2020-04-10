@@ -14,7 +14,7 @@ import {
   Text,
 } from 'native-base';
 import { Paragraph } from 'react-native-paper';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Linking } from 'react-native';
 import Constants from 'expo-constants';
 import FirebaseContext from '../services/FirebaseContext';
 import { NativeRouter, Route, Link } from 'react-router-native';
@@ -34,21 +34,46 @@ export default function About(props) {
         </Body>
         <Right />
       </Header>
-      <Content style={styles.paragraph}>
+      <Content style={styles.paragraph} enableOnAndroid>
         <Paragraph>
-          OruHelp (oruhelp.com) is an initiation to empower volunteers and NGOs.
-          The vison is to provide multiple utility applications for the
-          volunteers and NGOs. This app is built and being maintained by me
-          individually with my personal resource. Support me through your
-          feedback, thoughts and quality reviews. You can reach me through the
-          below email address.
+          <Paragraph
+            style={{ color: 'blue' }}
+            onPress={() => Linking.openURL('https:oruhelp.com')}>
+            OruHelp
+          </Paragraph>{' '}
+          is an initiation to empower volunteers and NGOs. The vison is to
+          provide multiple utility applications for the volunteers and NGOs.
+          This app is built and being maintained by me individually with my
+          personal resource. Support me through your feedback, thoughts and
+          quality reviews. You can reach me through the below email address.
           {'\n'}
           {'\n'}
           Thanks,
           {'\n'}
           Karthikeyan Chandrasekar
           {'\n'}
-          oruhelp@gmail.com
+          Email:{' '}
+          <Paragraph
+            style={{ color: 'blue' }}
+            onPress={() => Linking.openURL('mailto:oruhelp@gmail.com')}>
+            oruhelp@gmail.com
+          </Paragraph>
+          {'\n'}
+          Twitter:{' '}
+          <Paragraph
+            style={{ color: 'blue' }}
+            onPress={() => Linking.openURL('https://twitter.com/OruHelp')}>
+            https://twitter.com/OruHelp
+          </Paragraph>
+          {'\n'}
+          Facebook:{' '}
+          <Paragraph
+            style={{ color: 'blue' }}
+            onPress={() =>
+              Linking.openURL('https://www.facebook.com/OruHelpCom')
+            }>
+            https://www.facebook.com/OruHelpCom
+          </Paragraph>
         </Paragraph>
       </Content>
     </Container>

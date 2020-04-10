@@ -40,6 +40,7 @@ export default function AddReceipt(props) {
   });
   const [donarPicker, setDonarPicker] = useState(false);
   const [donars, setDonars] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [autoReceiptNumber, setAutoReceiptNumber] = useState(true);
   const showPreview = () => {
     props.history.push({
@@ -116,9 +117,10 @@ export default function AddReceipt(props) {
       .catch(err => console.log(err));
   };
   const addReceipt = () => {
-    if (!validate()) {
+    if (!validate() || loading) {
       return;
     }
+    setLoading(true);
     serviceContext.database
       .addReceipt(receipt)
       .then(res => {
@@ -126,16 +128,22 @@ export default function AddReceipt(props) {
           serviceContext.database
             .updateReceiptNumber(parseInt(receipt.number) + 1)
             .then(() => {
+              setLoading(false);
               props.history.push('/dashboard/receipts');
             })
             .catch(_err => {
+              setLoading(false);
               props.history.push('/dashboard/receipts');
             });
         } else {
+          setLoading(false);
           props.history.push('/dashboard/receipts');
         }
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        setLoading(false);
+        console.log(err);
+      });
   };
   return (
     <>
@@ -178,7 +186,7 @@ export default function AddReceipt(props) {
           </Body>
           <Right />
         </Header>
-        <Content>
+        <Content enableOnAndroid>
           <Form>
             <Item stackedLabel>
               <Label>Invoice Number</Label>
@@ -250,7 +258,7 @@ export default function AddReceipt(props) {
                 backgroundColor: serviceContext.theme.colors.primary,
               }}
               onPress={() => addReceipt()}>
-              <Title>Add Receipt</Title>
+              <Title>{loading ? 'Loading...' : 'Add Receipt'}</Title>
             </Button>
           </FooterTab>
         </Footer>

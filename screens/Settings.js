@@ -34,7 +34,7 @@ export default function Settings(props) {
         </Body>
         <Right />
       </Header>
-      <Content style={styles.paragraph}>
+      <Content style={styles.paragraph} enableOnAndroid>
          <Button
           primary
           bordered

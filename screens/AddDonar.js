@@ -42,6 +42,7 @@ export default function AddDonar(props) {
   const [contact, setContact] = useState(INITIAL_STATE);
   const [validator, setValidator] = useState(INITIAL_STATE);
   const [loadingContacts, setLoadingContacts] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (props.location.state && props.location.state.contact) {
@@ -113,12 +114,14 @@ export default function AddDonar(props) {
   }
 
   const addDonar = () => {
-    if (!validate()) {
+    if (!validate() || loading) {
       return;
     }
+    setLoading(true);
     serviceContext.database
       .addDonar(contact)
       .then(result => {
+        setLoading(false);
         props.history.push('/dashboard/donars');
       })
       .catch(err => console.log(err));
@@ -177,7 +180,7 @@ export default function AddDonar(props) {
         </Body>
         <Right />
       </Header>
-      <Content style={styles.paragraph}>
+      <Content style={styles.paragraph} enableOnAndroid>
         {props.location.state && props.location.state.contact ? (
           <Form>
             <Item
@@ -357,7 +360,7 @@ export default function AddDonar(props) {
             backgroundColor: serviceContext.theme.colors.primary,
           }}>
           <Button full onPress={() => addDonar()}>
-            <Title>Add Donar</Title>
+            <Title>{loading ? 'Loading...' : 'Add Donar'}</Title>
           </Button>
         </FooterTab>
       </Footer>

@@ -82,196 +82,208 @@ export default function Profile(props) {
           </Button>
         </Right>
       </Header>
-      <Tabs style={{ backgroundColor: serviceContext.theme.colors.primary }}>
-        <Tab
-          heading={
-            <TabHeading
-              style={{ backgroundColor: serviceContext.theme.colors.primary }}>
-              <Text>Personal</Text>
-            </TabHeading>
-          }>
-          <>
-            {orgDetails && orgDetails.sender && (
-              <ScrollView>
-                <Item floatingLabel style={styles.element}>
-                  <Label>Name</Label>
-                  <Input
-                    editable={enableEdit}
-                    returnKeyType="next"
-                    value={orgDetails.sender.name}
-                    onChangeText={_name =>
-                      setOrgDetails({
-                        ...orgDetails,
-                        sender: { ...orgDetails.sender, name: _name },
-                      })
-                    }
-                  />
-                </Item>
-                <Item floatingLabel style={styles.element}>
-                  <Label>Phone Number</Label>
-                  <Input
-                    editable={enableEdit}
-                    returnKeyType="next"
-                    value={orgDetails.sender.phoneNumber}
-                    onChangeText={_phoneNumber =>
-                      setOrgDetails({
-                        ...orgDetails,
-                        sender: {
-                          ...orgDetails.sender,
-                          phoneNumber: _phoneNumber,
-                        },
-                      })
-                    }
-                  />
-                </Item>
-                <Item floatingLabel style={styles.element}>
-                  <Label>Email</Label>
-                  <Input
-                    editable={enableEdit}
-                    returnKeyType="next"
-                    value={orgDetails.sender.email}
-                    onChangeText={_email =>
-                      setOrgDetails({
-                        ...orgDetails,
-                        sender: { ...orgDetails.sender, email: _email },
-                      })
-                    }
-                  />
-                </Item>
-              </ScrollView>
-            )}
-          </>
-        </Tab>
-        <Tab
-          heading={
-            <TabHeading
-              style={{ backgroundColor: serviceContext.theme.colors.primary }}>
-              <Text>Organization</Text>
-            </TabHeading>
-          }>
-          <>
-            {orgDetails && orgDetails.org && (
-              <ScrollView>
-                <Item floatingLabel style={styles.element}>
-                  <Label>Name</Label>
-                  <Input
-                    editable={enableEdit}
-                    returnKeyType="next"
-                    value={orgDetails.org.name}
-                    onChangeText={_name =>
-                      setOrgDetails({
-                        ...orgDetails,
-                        org: { ...orgDetails.org, name: _name },
-                      })
-                    }
-                  />
-                </Item>
-                <Item floatingLabel style={styles.element}>
-                  <Label>Address Line 1</Label>
-                  <Input
-                    editable={enableEdit}
-                    returnKeyType="next"
-                    value={orgDetails.org.addressLine1}
-                    onChangeText={_addressLine1 =>
-                      setOrgDetails({
-                        ...orgDetails,
-                        org: { ...orgDetails.org, addressLine1: _addressLine1 },
-                      })
-                    }
-                  />
-                </Item>
-                <Item floatingLabel style={styles.element}>
-                  <Label>Address Line 2</Label>
-                  <Input
-                    editable={enableEdit}
-                    returnKeyType="next"
-                    value={orgDetails.org.addressLine2}
-                    onChangeText={_addressLine2 =>
-                      setOrgDetails({
-                        ...orgDetails,
-                        org: { ...orgDetails.org, addressLine2: _addressLine2 },
-                      })
-                    }
-                  />
-                </Item>
-                <Item floatingLabel style={styles.element}>
-                  <Label>Country</Label>
-                  <Input
-                    editable={enableEdit}
-                    returnKeyType="next"
-                    value={orgDetails.org.registeredCountry}
-                    onChangeText={_registeredCountry =>
-                      setOrgDetails({
-                        ...orgDetails,
-                        org: {
-                          ...orgDetails.org,
-                          registeredCountry: _registeredCountry,
-                        },
-                      })
-                    }
-                  />
-                </Item>
-                <Item floatingLabel style={styles.element}>
-                  <Label>Pincode</Label>
-                  <Input
-                    editable={enableEdit}
-                    returnKeyType="next"
-                    value={orgDetails.org.pincode}
-                    onChangeText={_pincode =>
-                      setOrgDetails({
-                        ...orgDetails,
-                        org: { ...orgDetails.org, pincode: _pincode },
-                      })
-                    }
-                  />
-                </Item>
-                <Item floatingLabel style={styles.element}>
-                  <Label>Phone Number</Label>
-                  <Input
-                    editable={enableEdit}
-                    returnKeyType="next"
-                    value={orgDetails.org.phoneNumber}
-                    onChangeText={_phoneNumber =>
-                      setOrgDetails({
-                        ...orgDetails,
-                        org: { ...orgDetails.org, phoneNumber: _phoneNumber },
-                      })
-                    }
-                  />
-                </Item>
-                <Item floatingLabel style={styles.element}>
-                  <Label>Email</Label>
-                  <Input
-                    editable={enableEdit}
-                    returnKeyType="next"
-                    value={orgDetails.org.email}
-                    onChangeText={_email =>
-                      setOrgDetails({
-                        ...orgDetails,
-                        org: { ...orgDetails.org, email: _email },
-                      })
-                    }
-                  />
-                </Item>
-                <Item floatingLabel style={styles.element}>
-                  <Label>Website</Label>
-                  <Input
-                    editable={enableEdit}
-                    returnKeyType="next"
-                    value={orgDetails.org.website}
-                    onChangeText={_website =>
-                      setOrgDetails({
-                        ...orgDetails,
-                        org: { ...orgDetails.org, website: _website },
-                      })
-                    }
-                  />
-                </Item>
-              </ScrollView>
-            )}
-          </>
-        </Tab>
-      </Tabs>
+      <Content enableOnAndroid>
+        <Tabs style={{ backgroundColor: serviceContext.theme.colors.primary }}>
+          <Tab
+            heading={
+              <TabHeading
+                style={{
+                  backgroundColor: serviceContext.theme.colors.primary,
+                }}>
+                <Text>Personal</Text>
+              </TabHeading>
+            }>
+            <>
+              {orgDetails && orgDetails.sender && (
+                <ScrollView>
+                  <Item floatingLabel style={styles.element}>
+                    <Label>Name</Label>
+                    <Input
+                      editable={enableEdit}
+                      returnKeyType="next"
+                      value={orgDetails.sender.name}
+                      onChangeText={_name =>
+                        setOrgDetails({
+                          ...orgDetails,
+                          sender: { ...orgDetails.sender, name: _name },
+                        })
+                      }
+                    />
+                  </Item>
+                  <Item floatingLabel style={styles.element}>
+                    <Label>Phone Number</Label>
+                    <Input
+                      editable={enableEdit}
+                      returnKeyType="next"
+                      value={orgDetails.sender.phoneNumber}
+                      onChangeText={_phoneNumber =>
+                        setOrgDetails({
+                          ...orgDetails,
+                          sender: {
+                            ...orgDetails.sender,
+                            phoneNumber: _phoneNumber,
+                          },
+                        })
+                      }
+                    />
+                  </Item>
+                  <Item floatingLabel style={styles.element}>
+                    <Label>Email</Label>
+                    <Input
+                      editable={enableEdit}
+                      returnKeyType="next"
+                      value={orgDetails.sender.email}
+                      onChangeText={_email =>
+                        setOrgDetails({
+                          ...orgDetails,
+                          sender: { ...orgDetails.sender, email: _email },
+                        })
+                      }
+                    />
+                  </Item>
+                </ScrollView>
+              )}
+            </>
+          </Tab>
+          <Tab
+            heading={
+              <TabHeading
+                style={{
+                  backgroundColor: serviceContext.theme.colors.primary,
+                }}>
+                <Text>Organization</Text>
+              </TabHeading>
+            }>
+            <>
+              {orgDetails && orgDetails.org && (
+                <ScrollView>
+                  <Item floatingLabel style={styles.element}>
+                    <Label>Name</Label>
+                    <Input
+                      editable={enableEdit}
+                      returnKeyType="next"
+                      value={orgDetails.org.name}
+                      onChangeText={_name =>
+                        setOrgDetails({
+                          ...orgDetails,
+                          org: { ...orgDetails.org, name: _name },
+                        })
+                      }
+                    />
+                  </Item>
+                  <Item floatingLabel style={styles.element}>
+                    <Label>Address Line 1</Label>
+                    <Input
+                      editable={enableEdit}
+                      returnKeyType="next"
+                      value={orgDetails.org.addressLine1}
+                      onChangeText={_addressLine1 =>
+                        setOrgDetails({
+                          ...orgDetails,
+                          org: {
+                            ...orgDetails.org,
+                            addressLine1: _addressLine1,
+                          },
+                        })
+                      }
+                    />
+                  </Item>
+                  <Item floatingLabel style={styles.element}>
+                    <Label>Address Line 2</Label>
+                    <Input
+                      editable={enableEdit}
+                      returnKeyType="next"
+                      value={orgDetails.org.addressLine2}
+                      onChangeText={_addressLine2 =>
+                        setOrgDetails({
+                          ...orgDetails,
+                          org: {
+                            ...orgDetails.org,
+                            addressLine2: _addressLine2,
+                          },
+                        })
+                      }
+                    />
+                  </Item>
+                  <Item floatingLabel style={styles.element}>
+                    <Label>Country</Label>
+                    <Input
+                      editable={enableEdit}
+                      returnKeyType="next"
+                      value={orgDetails.org.registeredCountry}
+                      onChangeText={_registeredCountry =>
+                        setOrgDetails({
+                          ...orgDetails,
+                          org: {
+                            ...orgDetails.org,
+                            registeredCountry: _registeredCountry,
+                          },
+                        })
+                      }
+                    />
+                  </Item>
+                  <Item floatingLabel style={styles.element}>
+                    <Label>Pincode</Label>
+                    <Input
+                      editable={enableEdit}
+                      returnKeyType="next"
+                      value={orgDetails.org.pincode}
+                      onChangeText={_pincode =>
+                        setOrgDetails({
+                          ...orgDetails,
+                          org: { ...orgDetails.org, pincode: _pincode },
+                        })
+                      }
+                    />
+                  </Item>
+                  <Item floatingLabel style={styles.element}>
+                    <Label>Phone Number</Label>
+                    <Input
+                      editable={enableEdit}
+                      returnKeyType="next"
+                      value={orgDetails.org.phoneNumber}
+                      onChangeText={_phoneNumber =>
+                        setOrgDetails({
+                          ...orgDetails,
+                          org: { ...orgDetails.org, phoneNumber: _phoneNumber },
+                        })
+                      }
+                    />
+                  </Item>
+                  <Item floatingLabel style={styles.element}>
+                    <Label>Email</Label>
+                    <Input
+                      editable={enableEdit}
+                      returnKeyType="next"
+                      value={orgDetails.org.email}
+                      onChangeText={_email =>
+                        setOrgDetails({
+                          ...orgDetails,
+                          org: { ...orgDetails.org, email: _email },
+                        })
+                      }
+                    />
+                  </Item>
+                  <Item floatingLabel style={styles.element}>
+                    <Label>Website</Label>
+                    <Input
+                      editable={enableEdit}
+                      returnKeyType="next"
+                      value={orgDetails.org.website}
+                      onChangeText={_website =>
+                        setOrgDetails({
+                          ...orgDetails,
+                          org: { ...orgDetails.org, website: _website },
+                        })
+                      }
+                    />
+                  </Item>
+                </ScrollView>
+              )}
+            </>
+          </Tab>
+        </Tabs>
+      </Content>
       {enableEdit && (
         <Footer>
           <FooterTab

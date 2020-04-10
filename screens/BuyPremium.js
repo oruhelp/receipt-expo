@@ -39,7 +39,7 @@ export default function BuyPremium(props) {
         </Body>
         <Right />
       </Header>
-      <Content style={styles.paragraph}>
+      <Content style={styles.paragraph} enableOnAndroid>
         <Paragraph>
           As mentioned in the about page, this mission needs your help. My
           intention is not to sell this application, but however your financial
