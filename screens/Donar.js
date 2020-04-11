@@ -1,4 +1,4 @@
-import React, { Component, useState, useEffect, useContext } from 'react';
+import React, { Component, useState, useEffect, useContext } from "react";
 import {
   Container,
   Header,
@@ -19,14 +19,14 @@ import {
   List,
   ListItem,
   ActionSheet,
-} from 'native-base';
-import { Caption, Subheading, Divider } from 'react-native-paper';
-import { StyleSheet, View } from 'react-native';
-import { Overlay } from 'react-native-elements';
-import Constants from 'expo-constants';
-import { openDatabase } from 'expo-sqlite';
-import { NativeRouter, Route, Link } from 'react-router-native';
-import FirebaseContext from '../services/FirebaseContext';
+} from "native-base";
+import { Caption, Subheading, Divider } from "react-native-paper";
+import { StyleSheet, View } from "react-native";
+import { Overlay } from "react-native-elements";
+import Constants from "expo-constants";
+import { openDatabase } from "expo-sqlite";
+import { NativeRouter, Route, Link } from "react-router-native";
+import FirebaseContext from "../services/FirebaseContext";
 
 export default function Donar(props) {
   const [contact, setContact] = useState(null);
@@ -39,15 +39,15 @@ export default function Donar(props) {
       setContact(props.location.state.donar);
       serviceContext.database
         .getReceiptsOfDonar(props.location.state.donar.id)
-        .then(_receiptsData => setDonations(_receiptsData.rows._array));
+        .then((_receiptsData) => setDonations(_receiptsData.rows._array));
     }
   }, []);
 
   const deleteDonar = () => {
     serviceContext.database
       .deleteDonar(contact.id)
-      .then(() => props.history.push('/dashboard/donars'))
-      .catch(err => console.log('Error deleting Donar', err));
+      .then(() => props.history.push("/dashboard/donars"))
+      .catch((err) => console.log("Error deleting Donar", err));
   };
   return (
     <Container>
@@ -76,19 +76,19 @@ export default function Donar(props) {
           <Caption>Name</Caption>
           <Subheading>{contact && contact.name}</Subheading>
         </View>
-        {contact && contact.number != '' && (
+        {contact && contact.number != "" && (
           <View style={styles.elements}>
             <Caption>Number</Caption>
             <Subheading>{contact && contact.number}</Subheading>
           </View>
         )}
-        {contact && contact.email != '' && (
+        {contact && contact.email != "" && (
           <View style={styles.elements}>
             <Caption>Email</Caption>
             <Subheading>{contact && contact.email}</Subheading>
           </View>
         )}
-        {contact && contact.website != '' && (
+        {contact && contact.website != "" && (
           <View style={styles.elements}>
             <Caption>Website</Caption>
             <Subheading>{contact && contact.website}</Subheading>
@@ -96,26 +96,27 @@ export default function Donar(props) {
         )}
         <Divider style={styles.divider} />
         <List>
-          {donations &&
-            donations.length > 0 &&
+          {donations && donations.length > 0 && (
             <ListItem itemHeader style={{ paddingBottom: 0, paddingTop: 20 }}>
-              <Body style={{ alignItems: 'center' }}>
+              <Body style={{ alignItems: "center" }}>
                 <Text note>Donation History</Text>
               </Body>
-            </ListItem>(
-              donations.map(donation => (
-                <ListItem>
-                  <Body>
-                    <Subheading>Rs.{donation.amount}/-</Subheading>
-                  </Body>
-                  <Right>
-                    <Text note>
-                      {new Date(donation.dateTime).toLocaleDateString()}
-                    </Text>
-                  </Right>
-                </ListItem>
-              ))
-            )}
+            </ListItem>
+          )}
+          {donations &&
+            donations.length > 0 &&
+            donations.map((donation) => (
+              <ListItem>
+                <Body>
+                  <Subheading>Rs.{donation.amount}/-</Subheading>
+                </Body>
+                <Right>
+                  <Text note>
+                    {new Date(donation.dateTime).toLocaleDateString()}
+                  </Text>
+                </Right>
+              </ListItem>
+            ))}
         </List>
       </Content>
     </Container>

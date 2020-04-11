@@ -1,8 +1,11 @@
+import 'react-native-get-random-values';
+import { v4 as uuidv4 } from 'uuid';
 import React, { useContext, useState, useEffect } from 'react';
 import { Text, View, StyleSheet, Image } from 'react-native';
 import { Input, Divider } from 'react-native-elements';
 import { Dimensions } from 'react-native';
 import { WebView } from 'react-native-webview';
+
 import { TextInput } from 'react-native';
 import {
   Container,

@@ -28,7 +28,6 @@ import {
   DatePicker,
 } from 'native-base';
 import { TextInput } from 'react-native-paper';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scrollview';
 import { Paragraph, Divider } from 'react-native-paper';
 import Constants from 'expo-constants';
 import { countries } from '../constants/countries';
@@ -61,7 +60,7 @@ export default function AddOrg(props) {
   useEffect(() => {
     // If displayName not updated earlier let it update now
     if (
-      serviceContext.authUser.displayName == '' &&
+      serviceContext.authUser && serviceContext.authUser.displayName == '' &&
       props.location.state.signUpDetails
     )
       serviceContext.authUser.updateProfile({

@@ -1,48 +1,51 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Platform } from 'react-native';
+import React, { useContext, useState, useEffect } from "react";
+import { StyleSheet, Text, View, Platform } from "react-native";
 import {
   NativeRouter,
   Route,
   Link,
   BackButton,
   Redirect,
-} from 'react-router-native';
+} from "react-router-native";
 
-import About from './About';
-import AddDonar from './AddDonar';
-import AddOrg from './AddOrg';
-import AddReceipt from './AddReceipt';
-import BuyPremium from './BuyPremium';
-import ChangePassword from './ChangePassword';
-import ContactSearch from './ContactSearch';
-import Dashboard from './Dashboard';
-import Donar from './Donar';
-import Donars from './Donars';
-import ForgotPassword from './ForgotPassword';
-import Preview from './Preview';
-import Receipt from './Receipt';
-import Receipts from './Receipts';
-import Settings from './Settings';
-import ShareReceipt from './ShareReceipt';
-import Signin from './Signin';
-import Signup from './Signup';
-import SplashScreen from './SplashScreen';
-import Help from './Help';
-import Profile from './Profile';
-import Template from './Template';
-import TemplateColor from './TemplateColor';
-import TemplateLogo from './TemplateLogo';
-import Constants from 'expo-constants';
-import FirebaseContext from '../services/FirebaseContext';
+import About from "./About";
+import AddDonar from "./AddDonar";
+import AddOrg from "./AddOrg";
+import AddReceipt from "./AddReceipt";
+import BuyPremium from "./BuyPremium";
+import ChangePassword from "./ChangePassword";
+import ContactSearch from "./ContactSearch";
+import Dashboard from "./Dashboard";
+import Donar from "./Donar";
+import Donars from "./Donars";
+import ForgotPassword from "./ForgotPassword";
+import Preview from "./Preview";
+import Receipt from "./Receipt";
+import Receipts from "./Receipts";
+import Settings from "./Settings";
+import ShareReceipt from "./ShareReceipt";
+import Signin from "./Signin";
+import Signup from "./Signup";
+import SplashScreen from "./SplashScreen";
+import Help from "./Help";
+import Profile from "./Profile";
+import Template from "./Template";
+import TemplateColor from "./TemplateColor";
+import TemplateLogo from "./TemplateLogo";
+import Constants from "expo-constants";
+import FirebaseContext from "../services/FirebaseContext";
 
 export default function Index() {
   const serviceContext = useContext(FirebaseContext);
 
+  useEffect(() => {
+    console.log("In Index page", serviceContext.authUser);
+  }, []);
   return (
     <NativeRouter>
       <View
         style={{
-          height: Platform.OS === 'ios' ? 0 : Constants.statusBarHeight,
+          height: Platform.OS === "ios" ? 0 : Constants.statusBarHeight,
           backgroundColor: serviceContext.theme.colors.primary,
         }}
       />

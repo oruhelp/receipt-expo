@@ -24,7 +24,6 @@ import { NativeRouter, Route, Link } from 'react-router-native';
 import * as FileSystem from 'expo-file-system';
 import FirebaseContext from '../services/FirebaseContext';
 import * as MailComposer from 'expo-mail-composer';
-import * as SMS from 'expo-sms';
 import Expo from 'expo';
 
 export default function ShareReceipt(props) {

@@ -1,13 +1,13 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { StyleSheet, View, ImageBackground, Dimensions } from 'react-native';
-import { Container, Header, Content, Button, Text, Icon } from 'native-base';
-import { Divider, Headline, Subheading } from 'react-native-paper';
-import { Avatar, Card, Title, Paragraph } from 'react-native-paper';
-import Constants from 'expo-constants';
-import { Link } from 'react-router-native';
+import React, { useContext, useEffect, useState } from "react";
+import { StyleSheet, View, ImageBackground, Dimensions } from "react-native";
+import { Container, Header, Content, Button, Text, Icon } from "native-base";
+import { Divider, Headline, Subheading } from "react-native-paper";
+import { Avatar, Card, Title, Paragraph } from "react-native-paper";
+import Constants from "expo-constants";
+import { Link } from "react-router-native";
 
-import FirebaseContext from '../services/FirebaseContext';
-import AdjustLabel from '../components/AdjustLabel';
+import FirebaseContext from "../services/FirebaseContext";
+import AdjustLabel from "../components/AdjustLabel";
 
 export default function SideBarContent(props) {
   const serviceContext = useContext(FirebaseContext);
@@ -16,29 +16,29 @@ export default function SideBarContent(props) {
   useEffect(() => {
     serviceContext.database
       .getActiveOrg()
-      .then(_res => {
+      .then((_res) => {
         setProfile({
           userDisplayName: _res.rows._array[0].senderName,
           logoSrc: _res.rows._array[0].logoSrc,
           orgName: _res.rows._array[0].name,
         });
       })
-      .catch(_err => console.log('Error in Drawer constructoru', _err));
+      .catch((_err) => console.log("Error in Drawer constructoru", _err));
   }, []);
   const styles = StyleSheet.create({
     title: {
-      color: 'white',
+      color: "white",
       fontSize: 20,
     },
     orgTitle: {
-      color: 'white',
+      color: "white",
       fontSize: 15,
     },
     backImage: {
-      height: Math.round(Dimensions.get('window').height) * 0.2,
-      width: '100%',
-      justifyContent: 'flex-end',
-      alignItems: 'center',
+      height: Math.round(Dimensions.get("window").height) * 0.2,
+      width: "100%",
+      justifyContent: "flex-end",
+      alignItems: "center",
       backgroundColor: serviceContext.theme.colors.primary,
       margin: 0,
       padding: 0,
@@ -46,8 +46,8 @@ export default function SideBarContent(props) {
     },
     container1: {
       flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
+      justifyContent: "center",
+      alignItems: "center",
       padding: 0,
       margin: 0,
     },
@@ -64,9 +64,9 @@ export default function SideBarContent(props) {
     },
   });
   const getUser = () => {
-    serviceContext.database.getActiveOrg().then(_res => {
+    serviceContext.database.getActiveOrg().then((_res) => {
       serviceContext.setSnackMessage(JSON.stringify(profile));
-      console.log('For Deawer', profile);
+      console.log("For Deawer", profile);
     });
   };
   return (
@@ -83,53 +83,51 @@ export default function SideBarContent(props) {
         <Divider />
         <Button
           transparent
-          style={{ justifyContent: 'flex-start' }}
+          style={{ justifyContent: "flex-start" }}
           onPress={() =>
             props.history.push({
-              pathname: '/profile',
+              pathname: "/profile",
               state: { orgDetails: props.orgDetails },
             })
-          }>
+          }
+        >
           <Icon name="person" style={styles.icon} />
           <Text style={styles.listButton}>Profile</Text>
         </Button>
         <Button
           transparent
-          style={{ justifyContent: 'flex-start' }}
-          onPress={() => props.history.push('/settings')}>
+          style={{ justifyContent: "flex-start" }}
+          onPress={() => props.history.push("/settings")}
+        >
           <Icon name="settings" style={styles.icon} />
           <Text style={styles.listButton}>Settings</Text>
         </Button>
         <Divider />
         <Button
           transparent
-          style={{ justifyContent: 'flex-start' }}
-          onPress={() => props.history.push('/help')}>
+          style={{ justifyContent: "flex-start" }}
+          onPress={() => props.history.push("/help")}
+        >
           <Icon name="help-circle" style={styles.icon} />
           <Text style={styles.listButton}>FAQs</Text>
         </Button>
         <Button
           transparent
-          style={{ justifyContent: 'flex-start' }}
-          onPress={() => props.history.push('/buypremium')}>
-          <Icon name="heart" style={styles.icon} />
-          <Text style={styles.listButton}>Sponsor</Text>
-        </Button>
-        <Button
-          transparent
-          style={{ justifyContent: 'flex-start' }}
-          onPress={() => props.history.push('/about')}>
+          style={{ justifyContent: "flex-start" }}
+          onPress={() => props.history.push("/about")}
+        >
           <Icon name="information-circle" style={styles.icon} />
           <Text style={styles.listButton}>About</Text>
         </Button>
         <Divider />
         <Button
-          style={{ justifyContent: 'flex-start' }}
+          style={{ justifyContent: "flex-start" }}
           transparent
           onPress={() => {
-            props.history.push('/signin');
+            props.history.push("/signin");
             return serviceContext.service.doSignOut().then(() => {});
-          }}>
+          }}
+        >
           <Icon name="log-out" style={styles.icon} />
           <Text style={styles.listButton}>Sign Out</Text>
         </Button>
