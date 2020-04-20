@@ -63,12 +63,6 @@ export default function SideBarContent(props) {
       color: serviceContext.theme.colors.primary,
     },
   });
-  const getUser = () => {
-    serviceContext.database.getActiveOrg().then((_res) => {
-      serviceContext.setSnackMessage(JSON.stringify(profile));
-      console.log("For Deawer", profile);
-    });
-  };
   return (
     <Container style={styles.container}>
       <Content>

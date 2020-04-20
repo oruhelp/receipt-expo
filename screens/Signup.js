@@ -118,7 +118,7 @@ export default function Signup(props) {
           });
       })
       .catch(error => {
-        service.setSnackMessage('OHR1311' + error.message);
+        service.setSnackMessage('OHR1311 - Unexpected error occured, please try again');
         setIsLoading(false);
       });
   };

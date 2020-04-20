@@ -38,9 +38,6 @@ import FirebaseContext from "../services/FirebaseContext";
 export default function Index() {
   const serviceContext = useContext(FirebaseContext);
 
-  useEffect(() => {
-    console.log("In Index page", serviceContext.authUser);
-  }, []);
   return (
     <NativeRouter>
       <View
